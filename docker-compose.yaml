@@ -18,6 +18,22 @@ services:
     ports:
       - "8000:8000"
 
+  etl:
+    build:
+      01_etl
+    environment:
+      - POSTGRES_NAME=${POSTGRES_NAME:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_HOST=${POSTGRES_HOST:-db}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - ELASTIC_PATH=${ELASTIC_PATH:-http://elasticsearch:9200}
+    depends_on:
+      - elasticsearch
+      - service
+      - db
+      - redis
+
   elasticsearch:
     image: bitnami/elasticsearch:latest
     environment:
@@ -27,6 +43,11 @@ services:
       - elastic-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
 
 
 volumes:

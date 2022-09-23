@@ -18,6 +18,17 @@ services:
     ports:
       - "8000:8000"
 
+  elasticsearch:
+    image: bitnami/elasticsearch:latest
+    environment:
+      - discovery.type=single-node
+
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
 
 volumes:
   postgres_data:
+  elastic-data:

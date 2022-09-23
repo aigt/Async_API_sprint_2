@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import datetime
 import uuid
 
-from models import actor, director, writer
 from models.base import orjson_model
 
 
@@ -17,3 +18,9 @@ class FilmWork(orjson_model.OrjsonModel):
     writers: list[writer.Writer]
     directors: list[director.Director]
     file_link: str
+
+
+# Чтобы не было циклического импорта
+from models import actor, director, writer
+
+FilmWork.update_forward_refs()

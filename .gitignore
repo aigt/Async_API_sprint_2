@@ -54,7 +54,6 @@ docs/_build/
 # PyBuilder
 target/
 
-
 ### Django ###
 *.log
 *.pot
@@ -62,9 +61,7 @@ target/
 __pycache__/
 local_settings.py
 
-
 docker_compose/movies_project/app/config/.env
 db.sqlite3
 
-dev/
-env_files/.env.db
+env_files/*.env

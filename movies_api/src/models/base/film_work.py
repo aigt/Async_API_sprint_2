@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import datetime
 import uuid
+from typing import List
 
 from models.base import orjson_model
 
@@ -10,17 +10,18 @@ class FilmWork(orjson_model.OrjsonModel):
     """Базовый класс для кинопроизведений."""
 
     id: uuid.UUID
+    imdb_rating: float
     title: str
+    genre: List[str]
     description: str
-    creation_date: datetime.date
-    genre: list[str]
-    actors: list[actor.Actor]
-    writers: list[writer.Writer]
-    directors: list[director.Director]
-    file_link: str
+    actors_names: List[str]
+    writers_names: List[str]
+    actors: List[actor.Actor]
+    writers: List[writer.Writer]
+    director: List[str]
 
 
 # Чтобы не было циклического импорта
-from models import actor, director, writer
+from models import actor, director, writer  # noqa: E402, F401
 
 FilmWork.update_forward_refs()

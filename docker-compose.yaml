@@ -5,6 +5,7 @@ services:
     image: postgres:12.4
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      - .:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_NAME=${POSTGRES_NAME:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -48,7 +49,6 @@ services:
     image: 'bitnami/redis:latest'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-
 
 volumes:
   postgres_data:

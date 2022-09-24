@@ -1,16 +1,34 @@
 import logging
+import uuid
 from functools import lru_cache
-from typing import Optional
+from typing import List, Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
+from models.query.param_with_option import ParamWithOption
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+
+
+class PageConfig(BaseModel):
+    size: int = 20
+    number: int = 1
+
+
+class FilterConfig(BaseModel):
+    genre: uuid.UUID | None = None
+
+
+class ListSearchConfig(BaseModel):
+    page: PageConfig
+    filter: FilterConfig
+    sort: str
 
 
 class FilmService:
@@ -18,7 +36,10 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def list(self) -> list[Film]:
+    async def list(
+        self,
+        query_params: List[ParamWithOption],
+    ) -> list[Film]:
         resp = await self.elastic.search(
             index="movies",
             query={"match_all": {}},

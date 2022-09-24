@@ -8,21 +8,31 @@ logging.basicConfig(
 )
 
 
+# PG_DB_PATH = {
+#     "dbname": os.getenv("POSTGRES_NAME"),
+#     "user": os.getenv("POSTGRES_USER"),
+#     "password": os.getenv("POSTGRES_PASSWORD"),
+#     "host": os.getenv("POSTGRES_HOST"),
+#     "port": os.getenv("POSTGRES_PORT"),
+# }
+
 PG_DB_PATH = {
-    "dbname": os.getenv("POSTGRES_NAME"),
-    "user": os.getenv("POSTGRES_USER"),
-    "password": os.getenv("POSTGRES_PASSWORD"),
-    "host": os.getenv("POSTGRES_HOST"),
-    "port": os.getenv("POSTGRES_PORT"),
+    "dbname": "movies_db",
+    "user": "app",
+    "password": "123qwe",
+    "host": "127.0.0.1",
+    "port": 5432,
 }
 
 
-ELASTIC_PATH = os.getenv("ELASTIC_PATH")
+# ELASTIC_PATH = os.getenv("ELASTIC_PATH")
+ELASTIC_PATH = "http://127.0.0.1:9200"
 
 
 MOVIES_STATE_PATH = "save_movie_state.json"
 GENRES_STATE_PATH = "save_genre_state.json"
 PERSONS_STATE_PATH = "save_person_state.json"
+ALL_GENRES_STATE_PATH = 'save_all_genres_state.json'
 
 
 ELASTIC_SETTINGS = {
@@ -89,4 +99,21 @@ ELASTIC_MAPPINGS = {
     },
 }
 
+ELASTIC_MAPPINGS_ALL_GENRES = {
+    "dynamic": "strict",
+    "properties": {
+        "id": {"type": "keyword"},
+        "name": {"type": "text"},
+    }
+}
+
+ALL_MAPPINGS = {
+    "movies": ELASTIC_MAPPINGS,
+    "genres": ELASTIC_MAPPINGS_ALL_GENRES
+}
+
+
 ELASTIC_INDEX = "movies"
+
+ELASTIC_INDEX = {"movies": "movies",
+                 "genres": "genres"}

@@ -16,3 +16,10 @@ class Movie:
     writers_names: list
     actors: list
     writers: list
+
+
+@dataclass(frozen=True)
+class Genre:
+    id: uuid.UUID
+    name: str
+    modified: datetime

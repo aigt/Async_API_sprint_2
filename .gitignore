@@ -65,3 +65,6 @@ docker_compose/movies_project/app/config/.env
 db.sqlite3
 
 env_files/*.env
+
+#idea
+.idea

@@ -2,10 +2,10 @@ import logging
 
 import aioredis
 import uvicorn
-from src.api.v1 import films
-from src.core import config
-from src.core.logger import LOGGING
-from src.db import elastic, redis
+from api.v1 import films
+from core import config
+from core.logger import LOGGING
+from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse

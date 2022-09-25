@@ -15,6 +15,10 @@ class Film(BaseModel):
     title: str
     imdb_rating: float
     genre: List[Any]
+    description: str
+    actors: List[Any]
+    writers: List[Any]
+    director: str
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
@@ -45,6 +49,10 @@ async def film_details(
         title=film.title,
         imdb_rating=film.imdb_rating,
         genre=film.genre,
+        description=film.description,
+        actors=film.actors,
+        writers=film.writers,
+        director=film.director,
     )
 
 
@@ -74,6 +82,10 @@ async def film_list(
                 title=film.title,
                 imdb_rating=film.imdb_rating,
                 genre=film.genre,
+                description=film.description,
+                actors=film.actors,
+                writers=film.writers,
+                director=film.director,
             )
             for film in films
         ]

@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import List, Optional
+from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -9,14 +9,29 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.elastic.film import Film
-from models.request.param_with_option import ParamWithOption
 from services.film_list_query_config import FilmListQueryConfig
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
 
-async def film_list_es_query(query_params: List[ParamWithOption]):
-    pass
+async def film_list_es_query(query_config: FilmListQueryConfig):
+    body = {
+        'size': query_config.page.size,
+        'from': (query_config.page.number - 1) * query_config.page.size,
+        'query': {
+            'match_all': {},
+        },
+    }
+    logging.info(body)
+
+    if query_config.sort is not None:
+        body['sort'] = {
+            query_config.sort.field: {
+                'order': query_config.sort.order,
+            },
+        }
+
+    return body
 
 
 class FilmService:
@@ -31,11 +46,9 @@ class FilmService:
 
         logging.info(query_config)
 
-        resp = await self.elastic.search(
-            index="movies",
-            query={"match_all": {}},
-            size=20,
-        )
+        body = await film_list_es_query(query_config)
+
+        resp = await self.elastic.search(index="movies", body=body)
         # logging.info(resp)
 
         films = [Film(**film_doc['_source']) for film_doc in resp['hits']['hits']]

@@ -14,6 +14,7 @@ router = APIRouter()
 class Film(BaseModel):
     id: uuid.UUID
     title: str
+    imdb_rating: float
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
@@ -61,4 +62,9 @@ async def film_list(
             detail='any film is not found',
         )
 
-    return {'films': [Film(id=film.id, title=film.title) for film in films]}
+    return {
+        'films': [
+            Film(id=film.id, title=film.title, imdb_rating=film.imdb_rating)
+            for film in films
+        ]
+    }

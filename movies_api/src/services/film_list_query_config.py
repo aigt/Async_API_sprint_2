@@ -19,10 +19,15 @@ class FilterConfig(BaseModel):
     value: uuid.UUID | None = None
 
 
+class SortConfig(BaseModel):
+    field: str | None = None
+    order: str = 'asc'
+
+
 class FilmListQueryConfig(BaseModel):
     page: PageConfig = PageConfig()
     filter: FilterConfig = FilterConfig()
-    sort: str | None = None
+    sort: SortConfig | None = None
 
 
 async def film_list_query_config(
@@ -34,7 +39,12 @@ async def film_list_query_config(
     for param in query_params:
         match param:
             case ParamWithOption(name='sort'):
-                query_config.sort = param.value
+                query_config.sort = SortConfig()
+                sort_key = param.value
+                if sort_key.startswith('-'):
+                    query_config.sort.order = 'desc'
+                    sort_key = sort_key[1:]
+                query_config.sort.field = sort_key
             case ParamWithOption(name='page', option='size'):
                 page_size = int(param.value)
                 if page_size > config.MAX_PAGE_SIZE:

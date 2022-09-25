@@ -23,3 +23,9 @@ class Genre:
     id: uuid.UUID
     name: str
     modified: datetime
+
+@dataclass(frozen=True)
+class Person:
+    id: uuid.UUID
+    full_name: str
+    modified: datetime

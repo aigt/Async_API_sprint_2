@@ -15,26 +15,26 @@ class PostgresExtractor:
         self.query = query
         self.state = state
         self._conn = conn
-        # self._connection = None
+        self._connection = None
+        # self._connection = psycopg2.connect(**self._conn)
+
+    def connected(self) -> bool | None:
+        """Функция проверяет наличие соединения с БД"""
+        return self._connection and self._connection.closed == 0
+
+    def connect(self) -> None:
+        """Функция пересоздает соединение с БД"""
+        self.close()
         self._connection = psycopg2.connect(**self._conn)
 
-    # def connected(self) -> bool | None:
-    #     """Функция проверяет наличие соединения с БД"""
-    #     return self._connection and self._connection.closed == 0
-    #
-    # def connect(self) -> None:
-    #     """Функция пересоздает соединение с БД"""
-    #     self.close()
-    #     self._connection = psycopg2.connect(**self._conn)
-    #
-    # def close(self) -> None:
-    #     """Функция закрывает соединение с БД"""
-    #     if self.connected():
-    #         try:
-    #             self._connection.close()
-    #         except Exception as e:
-    #             logger.error(e)
-    #     self._connection = None
+    def close(self) -> None:
+        """Функция закрывает соединение с БД"""
+        if self.connected():
+            try:
+                self._connection.close()
+            except Exception as e:
+                logger.error(e)
+        self._connection = None
 
     def get_movies_changes(self, cursor, query, state):
         if state.is_empty():
@@ -71,7 +71,7 @@ class PostgresExtractor:
             return movies_with_changed_details
         return []
 
-    def get_all_genres(self, cursor, query, state):
+    def get_all_genres_persons(self, cursor, query, state):
         if state.is_empty():
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:
@@ -85,8 +85,9 @@ class PostgresExtractor:
             return data
         return data
 
-    # @retry(wait=wait_exponential(min=5, max=120))
-    # @pg_reconnect
+
+    @retry(wait=wait_exponential(min=5, max=120))
+    @pg_reconnect
     def extract(self) -> list:
         """Функция подключается к БД, выполняет запрос и возвращает данные в виде списка"""
         data = []
@@ -115,11 +116,16 @@ class PostgresExtractor:
             state=self.state["genre"],
         )
 
-        genres_data = self.get_all_genres(
+        genres_data = self.get_all_genres_persons(
             cursor=pg_curs,
             query=self.query["get_all_genres"],
             state=self.state["all_genres"])
 
+        persons_data = self.get_all_genres_persons(
+            cursor=pg_curs,
+            query=self.query["get_all_persons"],
+            state=self.state["all_persons"])
 
 
-        return (data, genres_data, 1)
+
+        return (data, genres_data, persons_data)

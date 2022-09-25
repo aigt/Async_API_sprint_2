@@ -2,7 +2,8 @@ import os
 
 from config import (ELASTIC_INDEX, ALL_MAPPINGS, ELASTIC_PATH,
                     ELASTIC_SETTINGS, GENRES_STATE_PATH, MOVIES_STATE_PATH,
-                    PERSONS_STATE_PATH, ALL_GENRES_STATE_PATH, PG_DB_PATH, logger)
+                    PERSONS_STATE_PATH, ALL_GENRES_STATE_PATH, ALL_PERSONS_STATE_PATH,
+                    PG_DB_PATH, logger)
 from custom_decorators import period
 from extract import PostgresExtractor
 from load import ElasticLoader
@@ -28,7 +29,8 @@ if __name__ == "__main__":
         "movie": State(storage=JsonFileStorage(file_path=MOVIES_STATE_PATH)),
         "genre": State(storage=JsonFileStorage(file_path=GENRES_STATE_PATH)),
         "person": State(storage=JsonFileStorage(file_path=PERSONS_STATE_PATH)),
-        "all_genres": State(storage=JsonFileStorage(file_path=ALL_GENRES_STATE_PATH))
+        "all_genres": State(storage=JsonFileStorage(file_path=ALL_GENRES_STATE_PATH)),
+        "all_persons": State(storage=JsonFileStorage(file_path=ALL_PERSONS_STATE_PATH))
     }
 
     movies_extractor = PostgresExtractor(

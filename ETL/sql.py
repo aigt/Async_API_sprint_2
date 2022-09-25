@@ -126,4 +126,11 @@ WHERE modified > %s
 ORDER BY modified
 LIMIT 200; 
 """,
+
+    "get_all_persons": """SELECT id, full_name, modified
+FROM content.person
+WHERE modified > %s
+ORDER BY modified
+LIMIT 200; 
+""",
 }

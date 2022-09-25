@@ -13,12 +13,12 @@ class FilmWork(orjson_model.OrjsonModel):
     imdb_rating: float
     title: str
     genre: List[str]
-    description: str
-    actors_names: List[str]
-    writers_names: List[str]
+    description: str | None
+    actors_names: List[str] | None
+    writers_names: List[str] | None
     actors: List[actor.Actor]
     writers: List[writer.Writer]
-    director: List[str]
+    director: str
 
 
 # Чтобы не было циклического импорта

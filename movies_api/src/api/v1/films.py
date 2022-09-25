@@ -4,7 +4,6 @@ from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-
 from services.film import FilmService, get_film_service
 from services.film_list_query_config import FilmListQueryConfig, film_list_query_config
 
@@ -41,7 +40,12 @@ async def film_details(
     # ответов API
     # вы бы предоставляли клиентам данные, которые им не нужны
     # и, возможно, данные, которые опасно возвращать
-    return Film(id=film.id, title=film.title)
+    return Film(
+        id=film.id,
+        title=film.title,
+        imdb_rating=film.imdb_rating,
+        genre=film.genre,
+    )
 
 
 class SBrac(BaseModel):

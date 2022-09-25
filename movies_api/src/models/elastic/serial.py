@@ -1,4 +1,4 @@
-from models.base import film_work
+from models.elastic.base import film_work
 
 
 class Serial(film_work.FilmWork):

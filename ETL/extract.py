@@ -70,6 +70,21 @@ class PostgresExtractor:
             return movies_with_changed_details
         return []
 
+    def get_all_genres_persons(self, cursor, query, state):
+        if state.is_empty():
+            last_modified = "1000-01-01 00:00:00.222397+00"
+        else:
+            last_modified = state.get_state("modified")
+
+        cursor.execute(query, (last_modified,))
+        data = cursor.fetchall()
+        if data:
+            modified = data[len(data) - 1]["modified"]
+            state.set_state(key="modified", value=modified)
+            return data
+        return data
+
+
     @retry(wait=wait_exponential(min=5, max=120))
     @pg_reconnect
     def extract(self) -> list:
@@ -100,4 +115,16 @@ class PostgresExtractor:
             state=self.state["genre"],
         )
 
-        return data
+        genres_data = self.get_all_genres_persons(
+            cursor=pg_curs,
+            query=self.query["get_all_genres"],
+            state=self.state["all_genres"])
+
+        persons_data = self.get_all_genres_persons(
+            cursor=pg_curs,
+            query=self.query["get_all_persons"],
+            state=self.state["all_persons"])
+
+
+
+        return (data, genres_data, persons_data)

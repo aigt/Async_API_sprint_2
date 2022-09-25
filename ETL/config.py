@@ -23,6 +23,8 @@ ELASTIC_PATH = os.getenv("ELASTIC_PATH")
 MOVIES_STATE_PATH = "save_movie_state.json"
 GENRES_STATE_PATH = "save_genre_state.json"
 PERSONS_STATE_PATH = "save_person_state.json"
+ALL_GENRES_STATE_PATH = 'save_all_genres_state.json'
+ALL_PERSONS_STATE_PATH = 'save_all_persons_state.json'
 
 
 ELASTIC_SETTINGS = {
@@ -89,4 +91,30 @@ ELASTIC_MAPPINGS = {
     },
 }
 
-ELASTIC_INDEX = "movies"
+ELASTIC_MAPPINGS_ALL_GENRES = {
+    "dynamic": "strict",
+    "properties": {
+        "id": {"type": "keyword"},
+        "name": {"type": "text"},
+    }
+}
+
+ELASTIC_MAPPINGS_ALL_PERSONS = {
+    "dynamic": "strict",
+    "properties": {
+        "id": {"type": "keyword"},
+        "full_name": {"type": "text"},
+    }
+}
+
+ALL_MAPPINGS = {
+    "movies": ELASTIC_MAPPINGS,
+    "genres": ELASTIC_MAPPINGS_ALL_GENRES,
+    "persons": ELASTIC_MAPPINGS_ALL_PERSONS
+}
+
+
+
+ELASTIC_INDEX = {"movies": "movies",
+                 "genres": "genres",
+                 "persons": "persons"}

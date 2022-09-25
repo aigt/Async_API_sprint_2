@@ -3,27 +3,27 @@ extract_queries = {
 FROM content.person
 WHERE modified > %s
 ORDER BY modified
-LIMIT 100; 
+LIMIT 200; 
 """,
     "get_genres_id": """SELECT id, modified
 FROM content.genre
 WHERE modified > %s
 ORDER BY modified
-LIMIT 100; 
+LIMIT 200; 
 """,
     "get_movies_id_with_modified_persons": """ SELECT fw.id
 FROM content.film_work fw
 LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id
 WHERE pfw.person_id IN %s
 ORDER BY fw.modified
-LIMIT 100;
+LIMIT 200;
 """,
     "get_movies_id_with_modified_genres": """ SELECT fw.id
 FROM content.film_work fw
 LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id
 WHERE gfw.genre_id IN %s
 ORDER BY fw.modified
-LIMIT 100;
+LIMIT 200;
 """,
     "get_modified_movies": """ SELECT
     fw.id,
@@ -70,7 +70,7 @@ LIMIT 100;
     WHERE fw.modified > %s
     GROUP BY fw.id
     ORDER BY fw.modified
-    LIMIT 100;
+    LIMIT 200;
     """,
     "get_movies_with_modified_persons_or_genres": """ SELECT
     fw.id,
@@ -117,6 +117,20 @@ LIMIT 100;
     WHERE fw.id IN %s
     GROUP BY fw.id
     ORDER BY fw.modified
-    LIMIT 100;
+    LIMIT 200;
+""",
+
+    "get_all_genres": """SELECT id, name, modified
+FROM content.genre
+WHERE modified > %s
+ORDER BY modified
+LIMIT 200; 
+""",
+
+    "get_all_persons": """SELECT id, full_name, modified
+FROM content.person
+WHERE modified > %s
+ORDER BY modified
+LIMIT 200; 
 """,
 }

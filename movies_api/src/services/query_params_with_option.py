@@ -3,7 +3,6 @@ import re
 from typing import Any, List
 
 from fastapi import Request
-
 from models.request.param_with_option import ParamWithOption
 
 

@@ -1,11 +1,10 @@
 import uuid
 from typing import List
 
-from fastapi import Depends
-from pydantic import BaseModel
-
 from core import config
+from fastapi import Depends
 from models.request.param_with_option import ParamWithOption
+from pydantic import BaseModel
 from services.query_params_with_option import get_params_with_options
 
 

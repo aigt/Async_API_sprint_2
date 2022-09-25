@@ -7,22 +7,25 @@ services:
       - postgres_data:/var/lib/postgresql/data/
       - .:/docker-entrypoint-initdb.d/
     environment:
-      - POSTGRES_NAME=${POSTGRES_DB:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - POSTGRES_HOST=${POSTGRES_HOST:-db}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
       interval: 10s
       timeout: 5s
       retries: 5
-
 
   service:
     build: movies_api
     ports:
       - "8000:8000"
+    env_file:
+      - ./env_files/elastic.env
+      - ./env_files/redis.env
+      - ./env_files/movies_api.env
     depends_on:
       redis:
         condition: service_healthy
@@ -30,8 +33,7 @@ services:
         condition: service_healthy
 
   etl:
-    build:
-      ETL
+    build: ETL
     environment:
       - POSTGRES_NAME=${POSTGRES_NAME:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -51,7 +53,6 @@ services:
     image: bitnami/elasticsearch:latest
     environment:
       - discovery.type=single-node
-
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
     ports:
@@ -66,6 +67,8 @@ services:
     image: 'bitnami/redis:latest'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+    expose:
+      - '6379'
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 1s

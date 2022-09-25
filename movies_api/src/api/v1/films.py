@@ -1,14 +1,14 @@
 import logging
-import re
 import uuid
 from http import HTTPStatus
-from typing import Any, List
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from models.request.param_with_option import ParamWithOption
 from services.film import FilmService, get_film_service
+from services.film_list_query_config import FilmListQueryConfig, film_list_query_config
 
 router = APIRouter()
 
@@ -16,26 +16,6 @@ router = APIRouter()
 class Film(BaseModel):
     id: uuid.UUID
     title: str
-
-
-def parse_param(param: str, value: Any) -> ParamWithOption:
-    """Функция для поддержки квадратных скобок в имени переменных запроса.
-
-    Args:
-        param (str): Имя параметра
-        value (Any): Переменная
-
-    Returns:
-        ParamWithOption: объект параметра с опцией
-    """
-    regex = r"(?P<param>.*)\[(?P<option>.*)\]"
-    if m := re.search(regex, param):
-        return ParamWithOption(
-            name=m.group("param"),
-            option=m.group("option"),
-            value=value,
-        )
-    return ParamWithOption(name=param, value=value)
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
@@ -70,15 +50,12 @@ class SBrac(BaseModel):
 
 @router.get('/')  # , response_model=List[Film])
 async def film_list(
-    request: Request,
+    query_config: FilmListQueryConfig = Depends(film_list_query_config),
     film_service: FilmService = Depends(get_film_service),
 ) -> List[Film]:
 
-    qs = [parse_param(k, v) for k, v in request.query_params.items()]
-    logging.info(f'{qs=}')
-
-    films = await film_service.list(qs)
-    logging.info(films)
+    films = await film_service.list(query_config)
+    # logging.info(films)
 
     if not films:
         raise HTTPException(

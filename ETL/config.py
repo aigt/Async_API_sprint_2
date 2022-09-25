@@ -16,17 +16,8 @@ PG_DB_PATH = {
     "port": os.getenv("POSTGRES_PORT"),
 }
 
-# PG_DB_PATH = {
-#     "dbname": "movies_db",
-#     "user": "app",
-#     "password": "123qwe",
-#     "host": "127.0.0.1",
-#     "port": 5432,
-# }
-
 
 ELASTIC_PATH = os.getenv("ELASTIC_PATH")
-# ELASTIC_PATH = "http://127.0.0.1:9200"
 
 
 MOVIES_STATE_PATH = "save_movie_state.json"

@@ -16,7 +16,6 @@ class PostgresExtractor:
         self.state = state
         self._conn = conn
         self._connection = None
-        # self._connection = psycopg2.connect(**self._conn)
 
     def connected(self) -> bool | None:
         """Функция проверяет наличие соединения с БД"""

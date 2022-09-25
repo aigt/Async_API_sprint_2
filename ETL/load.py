@@ -22,7 +22,6 @@ class ElasticLoader:
     ) -> None:
         self._conn = conn
         self._connection = None
-        # self._connection = Elasticsearch(self._conn)
         self.index = index
         self.settings = settings
         self.mappings = mappings

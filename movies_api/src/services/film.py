@@ -10,8 +10,8 @@ from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.film import Film
-from models.query.param_with_option import ParamWithOption
+from models.elastic.film import Film
+from models.request.param_with_option import ParamWithOption
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 

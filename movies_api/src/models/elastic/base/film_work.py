@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import List
 
-from models.base import orjson_model
+from models.elastic.base import orjson_model
 
 
 class FilmWork(orjson_model.OrjsonModel):
@@ -22,6 +22,6 @@ class FilmWork(orjson_model.OrjsonModel):
 
 
 # Чтобы не было циклического импорта
-from models import actor, director, writer  # noqa: E402, F401
+from models.elastic import actor, director, writer  # noqa: E402, F401
 
 FilmWork.update_forward_refs()

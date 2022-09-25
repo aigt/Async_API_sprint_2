@@ -1,6 +1,6 @@
 import uuid
 
-from models.base import film_work, orjson_model
+from models.elastic.base import film_work, orjson_model
 
 
 class Person(orjson_model.OrjsonModel):

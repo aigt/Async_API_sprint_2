@@ -1,4 +1,4 @@
-from models.base import person
+from models.elastic.base import person
 
 
 class Actor(person.Person):

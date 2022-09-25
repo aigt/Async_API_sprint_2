@@ -31,6 +31,19 @@ async def film_list_es_query(query_config: FilmListQueryConfig):
             },
         }
 
+    if query_config.filter is not None:
+        match query_config.filter.field:
+            case 'genre':
+                body['query'] = {
+                    'bool': {
+                        'filter': {
+                            'term': {
+                                'genre': query_config.filter.value,
+                            }
+                        },
+                    }
+                }
+
     return body
 
 
@@ -49,7 +62,7 @@ class FilmService:
         body = await film_list_es_query(query_config)
 
         resp = await self.elastic.search(index="movies", body=body)
-        # logging.info(resp)
+        logging.info(resp)
 
         films = [Film(**film_doc['_source']) for film_doc in resp['hits']['hits']]
         # logging.info(films)

@@ -1,6 +1,6 @@
 import uuid
 from http import HTTPStatus
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ class Film(BaseModel):
     id: uuid.UUID
     title: str
     imdb_rating: float
+    genre: List[Any]
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
@@ -64,7 +65,12 @@ async def film_list(
 
     return {
         'films': [
-            Film(id=film.id, title=film.title, imdb_rating=film.imdb_rating)
+            Film(
+                id=film.id,
+                title=film.title,
+                imdb_rating=film.imdb_rating,
+                genre=film.genre,
+            )
             for film in films
         ]
     }

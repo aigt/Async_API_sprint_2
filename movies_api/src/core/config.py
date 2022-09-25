@@ -19,3 +19,6 @@ ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Максимальное количество элементов на странице
+MAX_PAGE_SIZE = 50

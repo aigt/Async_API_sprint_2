@@ -1,4 +1,3 @@
-import logging
 import uuid
 from http import HTTPStatus
 from typing import List
@@ -6,7 +5,6 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from models.request.param_with_option import ParamWithOption
 from services.film import FilmService, get_film_service
 from services.film_list_query_config import FilmListQueryConfig, film_list_query_config
 

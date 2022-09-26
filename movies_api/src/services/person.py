@@ -17,6 +17,17 @@ from services.film import film_list_es_query
 from models.person import Person
 
 
+# запрос на участие в фильмах по имени персонажа
+# {
+#   "query": {
+#     "multi_match": {
+#         "query" : "Andrew Chaikin"
+#         , "fields": ["actors_names","writers_names", "director"]
+#     }
+#   }
+
+
+
 class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis

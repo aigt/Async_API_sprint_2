@@ -8,35 +8,18 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 
-
-GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
-
-#подключаем выдачу жанров списком
-from services.genre_list_query_config import GenreListQueryConfig
 from models.genre import Genre
 
 
-async def genre_list_es_query(query_config: GenreListQueryConfig):
-    body = {
-        'size': query_config.page.size,
-        'from': (query_config.page.number - 1) * query_config.page.size,
-        'query': {
-            'match_all': {},
-        },
-    }
-    return body
-
-
-
+GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
 class GenreService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
 
-    async def list(self, query_config: GenreListQueryConfig) -> list[Genre]:
-        body = await genre_list_es_query(query_config)
-        resp = await self.elastic.search(index="genres", body=body)
+    async def list(self) -> list[Genre]:
+        resp = await self.elastic.search(index="genres")
         genres = [Genre(**genre_doc['_source']) for genre_doc in resp['hits']['hits']]
         return genres
 

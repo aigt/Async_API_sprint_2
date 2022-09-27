@@ -16,6 +16,7 @@ class Person(BaseModel):
     uuid: uuid.UUID
     full_name: str
     film_ids: List | None
+    role: List | None
 
 
 @router.get('/{person_id}', response_model=Person)
@@ -40,4 +41,7 @@ async def persons_list(
             status_code=HTTPStatus.NOT_FOUND,
             detail='persons not found',
         )
-    return [Person(uuid=person.id, full_name=person.full_name, film_ids=person.film_ids) for person in persons]
+    return [Person(uuid=person.id,
+                   full_name=person.full_name,
+                   film_ids=person.film_ids,
+                   role=person.role) for person in persons]

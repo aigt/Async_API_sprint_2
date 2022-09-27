@@ -12,8 +12,7 @@ def orjson_dumps(v, *, default):
 class Person(BaseModel):
     id: uuid.UUID
     full_name: str
-    # с role непонятно - роль привязана к конкретному фильму
-    # role: str
+    role: List[str] | None
     film_ids: List[str] | None
 
     class Config:

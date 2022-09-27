@@ -21,10 +21,6 @@ import uuid
 class Movie(BaseModel):
     id: uuid.UUID
 
-
-
-
-
 class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
@@ -43,15 +39,45 @@ class PersonService:
         persons_films = [Movie(**film_doc['_source']).id for film_doc in resp['hits']['hits']]
         return persons_films
 
+    async def get_persons_roles(self, name: str, role_to_check: str):
+        check_role_query = {
+            "query": {
+                "bool": {
+                    "must": {
+                        "match": {
+                            role_to_check: name
+                        }
+                    }
+                }
+            }
+        }
 
+        resp = await self.elastic.search(index="movies", body=check_role_query)
+        roles_list = [Movie(**film_doc['_source']).id for film_doc in resp['hits']['hits']]
+        return roles_list
 
     async def list(self, query_config: FilmListQueryConfig) -> list[Person]:
         body = await film_list_es_query(query_config)
         resp = await self.elastic.search(index="persons", body=body)
         persons = [Person(**person_doc['_source']) for person_doc in resp['hits']['hits']]
+
         for person in persons:
             person_films = await self.get_persons_films(person.full_name)
             person.film_ids = person_films
+
+            is_director = await self.get_persons_roles(person.full_name, "director")
+            is_actor = await self.get_persons_roles(person.full_name, "actors_names")
+            is_writer = await self.get_persons_roles(person.full_name, "writers_names")
+
+            roles = []
+            if is_director:
+                roles.append('Director')
+            if is_actor:
+                roles.append('Actor')
+            if is_writer:
+                roles.append('Writer')
+            person.role = roles
+
         return persons
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:

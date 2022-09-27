@@ -8,7 +8,7 @@ COPY start_etl.sh start_etl.sh
 RUN  pip install --upgrade pip \
      && pip install -r requirements.txt
 
-COPY . .
+COPY ./src .
 
 RUN chmod 777 /opt/app/start_etl.sh
 

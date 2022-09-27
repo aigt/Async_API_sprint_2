@@ -1,8 +1,8 @@
+import logging
 import time
 from typing import Any, Callable
 
 import psycopg2
-from config import logger
 from elastic_transport import ConnectionError
 
 
@@ -25,12 +25,12 @@ def pg_reconnect(extractor: Callable) -> Callable:
     def wrapper(process: Any, *args, **kwargs) -> Callable:
         if not process.connected():
             process.connect()
-            logger.warning("PG connection is UP")
+            logging.warning("PG connection is UP")
 
         try:
             return extractor(process, *args, **kwargs)
         except psycopg2.Error as err:
-            logger.error("PG connection is DOWN: %s", err)
+            logging.error("PG connection is DOWN: %s", err)
             process.close()
             raise
 
@@ -43,12 +43,12 @@ def es_reconnect(extractor: Callable) -> Callable:
     def wrapper(process: Any, *args, **kwargs):
         if not process.connected():
             process.connect()
-            logger.warning("Elastic connection is UP")
+            logging.warning("Elastic connection is UP")
 
         try:
             return extractor(process, *args, **kwargs)
         except ConnectionError as err:
-            logger.error("ES connection is DOWN: %s", err)
+            logging.error("ES connection is DOWN: %s", err)
             process.close()
             raise
 

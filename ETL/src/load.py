@@ -1,12 +1,11 @@
-import json
 from dataclasses import asdict
 from typing import Any
 
-from config import logger
-from custom_decorators import es_reconnect
 from elasticsearch import Elasticsearch
-from state import JsonFileStorage, State
 from tenacity import retry, wait_exponential
+
+import logging
+from custom_decorators import es_reconnect
 
 
 class ElasticLoader:
@@ -42,7 +41,7 @@ class ElasticLoader:
             try:
                 self._connection.transport.close()
             except Exception as e:
-                logger.error(e)
+                logging.error(e)
         self._connection = None
 
     @retry(wait=wait_exponential(min=5, max=120))
@@ -53,11 +52,15 @@ class ElasticLoader:
         В зависимости от id документы либо создаются, либо обновляются"""
         if not self._connection.indices.exists(index=self.index['movies']):
             self._connection.indices.create(
-                index=self.index['movies'], settings=self.settings, mappings=self.mappings['movies']
+                index=self.index['movies'],
+                settings=self.settings,
+                mappings=self.mappings['movies'],
             )
         if not self._connection.indices.exists(index=self.index['genres']):
             self._connection.indices.create(
-                index=self.index['genres'], settings=self.settings, mappings=self.mappings['genres']
+                index=self.index['genres'],
+                settings=self.settings,
+                mappings=self.mappings['genres'],
             )
 
         if dataclass_data[0]:
@@ -71,16 +74,18 @@ class ElasticLoader:
                     updated_data = doc_data
 
                     self._connection.update(
-                        index=self.index['movies'], body={"doc": updated_data}, id=doc_id
+                        index=self.index['movies'],
+                        body={"doc": updated_data},
+                        id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was updated.")
+                    logging.info(f"document {doc_id} was updated.")
                 else:
                     self._connection.create(
                         index=self.index['movies'],
                         document=doc_data,
                         id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was created.")
+                    logging.info(f"document {doc_id} was created.")
             self.state["movie"].set_state(key="modified", value=modified_data)
 
         if dataclass_data[1]:
@@ -94,16 +99,18 @@ class ElasticLoader:
                     updated_data = doc_data
 
                     self._connection.update(
-                        index=self.index['genres'], body={"doc": updated_data}, id=doc_id
+                        index=self.index['genres'],
+                        body={"doc": updated_data},
+                        id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was updated.")
+                    logging.info(f"document {doc_id} was updated.")
                 else:
                     self._connection.create(
                         index=self.index['genres'],
                         document=doc_data,
                         id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was created.")
+                    logging.info(f"document {doc_id} was created.")
             self.state["all_genres"].set_state(key="modified", value=modified_data)
 
         if dataclass_data[2]:
@@ -117,17 +124,19 @@ class ElasticLoader:
                     updated_data = doc_data
 
                     self._connection.update(
-                        index=self.index['persons'], body={"doc": updated_data}, id=doc_id
+                        index=self.index['persons'],
+                        body={"doc": updated_data},
+                        id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was updated.")
+                    logging.info(f"document {doc_id} was updated.")
                 else:
                     self._connection.create(
                         index=self.index['persons'],
                         document=doc_data,
                         id=doc_id,
                     )
-                    logger.warning(f"document {doc_id} was created.")
+                    logging.info(f"document {doc_id} was created.")
             self.state["all_persons"].set_state(key="modified", value=modified_data)
 
         if not dataclass_data[0] and not dataclass_data[1] and not dataclass_data[2]:
-            logger.warning("No new data in Postgres")
+            logging.info("No new data in Postgres")

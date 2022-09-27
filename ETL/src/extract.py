@@ -2,19 +2,20 @@ from re import M
 from typing import Any
 
 import psycopg2
-from config import logger
 from custom_decorators import pg_reconnect
 from psycopg2.extras import DictCursor
 from tenacity import retry, wait_exponential
+
+import logging
 
 
 class PostgresExtractor:
     """Извлечение данных из Postgres"""
 
-    def __init__(self, conn: dict, query: str, state: Any) -> None:
+    def __init__(self, dsn, query: str, state: Any) -> None:
         self.query = query
         self.state = state
-        self._conn = conn
+        self._dsn = dsn
         self._connection = None
 
     def connected(self) -> bool | None:
@@ -24,7 +25,7 @@ class PostgresExtractor:
     def connect(self) -> None:
         """Функция пересоздает соединение с БД"""
         self.close()
-        self._connection = psycopg2.connect(**self._conn)
+        self._connection = psycopg2.connect(dsn=self._dsn)
 
     def close(self) -> None:
         """Функция закрывает соединение с БД"""
@@ -32,7 +33,7 @@ class PostgresExtractor:
             try:
                 self._connection.close()
             except Exception as e:
-                logger.error(e)
+                logging.error(e)
         self._connection = None
 
     def get_movies_changes(self, cursor, query, state):
@@ -84,7 +85,6 @@ class PostgresExtractor:
             return data
         return data
 
-
     @retry(wait=wait_exponential(min=5, max=120))
     @pg_reconnect
     def extract(self) -> list:
@@ -118,13 +118,13 @@ class PostgresExtractor:
         genres_data = self.get_all_genres_persons(
             cursor=pg_curs,
             query=self.query["get_all_genres"],
-            state=self.state["all_genres"])
+            state=self.state["all_genres"],
+        )
 
         persons_data = self.get_all_genres_persons(
             cursor=pg_curs,
             query=self.query["get_all_persons"],
-            state=self.state["all_persons"])
-
-
+            state=self.state["all_persons"],
+        )
 
         return (data, genres_data, persons_data)

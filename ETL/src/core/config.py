@@ -1,21 +1,16 @@
-import logging
 import os
+from functools import lru_cache
+from typing import Any, Dict, Optional
 
-logger = logging.getLogger("logger")
-
-logging.basicConfig(
-    filename="etl.log", format="%(levelname)s:%(message)s", level=logging.WARNING
+from pydantic import (
+    BaseModel,
+    BaseSettings,
+    Field,
+    PostgresDsn,
+    PyObject,
+    RedisDsn,
+    validator,
 )
-
-
-PG_DB_PATH = {
-    "dbname": os.getenv("POSTGRES_NAME"),
-    "user": os.getenv("POSTGRES_USER"),
-    "password": os.getenv("POSTGRES_PASSWORD"),
-    "host": os.getenv("POSTGRES_HOST"),
-    "port": os.getenv("POSTGRES_PORT"),
-}
-
 
 ELASTIC_PATH = os.getenv("ELASTIC_PATH")
 
@@ -96,7 +91,7 @@ ELASTIC_MAPPINGS_ALL_GENRES = {
     "properties": {
         "id": {"type": "keyword"},
         "name": {"type": "text"},
-    }
+    },
 }
 
 ELASTIC_MAPPINGS_ALL_PERSONS = {
@@ -104,17 +99,46 @@ ELASTIC_MAPPINGS_ALL_PERSONS = {
     "properties": {
         "id": {"type": "keyword"},
         "full_name": {"type": "text"},
-    }
+    },
 }
 
 ALL_MAPPINGS = {
     "movies": ELASTIC_MAPPINGS,
     "genres": ELASTIC_MAPPINGS_ALL_GENRES,
-    "persons": ELASTIC_MAPPINGS_ALL_PERSONS
+    "persons": ELASTIC_MAPPINGS_ALL_PERSONS,
 }
 
 
+ELASTIC_INDEX = {"movies": "movies", "genres": "genres", "persons": "persons"}
 
-ELASTIC_INDEX = {"movies": "movies",
-                 "genres": "genres",
-                 "persons": "persons"}
+
+class Settings(BaseSettings):
+
+    # PostgreSQL database settings
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_NAME: str
+    POSTGRES_PORT: int
+    POSTGRES_DSN: Optional[PostgresDsn] = None
+
+    @validator('POSTGRES_DSN', pre=True)
+    def create_postgres_uri(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return PostgresDsn.build(
+            scheme="postgresql",
+            user=values.get("POSTGRES_USER"),
+            password=values.get("POSTGRES_PASSWORD"),
+            host=values.get("POSTGRES_HOST"),
+            path=f"/{values.get('POSTGRES_NAME') or ''}",
+            port=f"{values.get('POSTGRES_PORT')}",
+        )
+
+    class Config:
+        case_sensitive = True
+
+
+@lru_cache()
+def get_pg_settings():
+    return Settings()

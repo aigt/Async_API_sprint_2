@@ -14,7 +14,7 @@ class Person(BaseModel):
     full_name: str
     # с role непонятно - роль привязана к конкретному фильму
     # role: str
-    # film_ids: List[uuid.UUID]
+    film_ids: List[str] | None
 
     class Config:
         json_loads = orjson.loads

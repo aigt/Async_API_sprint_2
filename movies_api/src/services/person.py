@@ -15,16 +15,13 @@ GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 from services.film_list_query_config import FilmListQueryConfig
 from services.film import film_list_es_query
 from models.person import Person
+from pydantic import BaseModel
+import uuid
+
+class Movie(BaseModel):
+    id: uuid.UUID
 
 
-# запрос на участие в фильмах по имени персонажа
-# {
-#   "query": {
-#     "multi_match": {
-#         "query" : "Andrew Chaikin"
-#         , "fields": ["actors_names","writers_names", "director"]
-#     }
-#   }
 
 
 
@@ -33,10 +30,28 @@ class PersonService:
         self.redis = redis
         self.elastic = elastic
 
+    async def get_persons_films(self, name: str):
+        query_body = {
+            "query": {
+                "multi_match": {
+                    "query": name,
+                    "fields": ["actors_names", "writers_names", "director"]
+                }
+            }
+        }
+        resp = await self.elastic.search(index="movies", body=query_body)
+        persons_films = [Movie(**film_doc['_source']).id for film_doc in resp['hits']['hits']]
+        return persons_films
+
+
+
     async def list(self, query_config: FilmListQueryConfig) -> list[Person]:
         body = await film_list_es_query(query_config)
         resp = await self.elastic.search(index="persons", body=body)
         persons = [Person(**person_doc['_source']) for person_doc in resp['hits']['hits']]
+        for person in persons:
+            person_films = await self.get_persons_films(person.full_name)
+            person.film_ids = person_films
         return persons
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:

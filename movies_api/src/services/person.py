@@ -80,6 +80,36 @@ class PersonService:
 
         return persons
 
+    async def search_persons(self, query: str):
+        query_body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["actors_names", "writers_names", "director"]
+                }
+            }
+        }
+        resp = await self.elastic.search(index="persons", body=query_body)
+        persons = [Person(**person_doc['_source']) for person_doc in resp['hits']['hits']]
+
+        for person in persons:
+            person_films = await self.get_persons_films(person.full_name)
+            person.film_ids = person_films
+
+            is_director = await self.get_persons_roles(person.full_name, "director")
+            is_actor = await self.get_persons_roles(person.full_name, "actors_names")
+            is_writer = await self.get_persons_roles(person.full_name, "writers_names")
+
+            roles = []
+            if is_director:
+                roles.append('Director')
+            if is_actor:
+                roles.append('Actor')
+            if is_writer:
+                roles.append('Writer')
+            person.role = roles
+        return persons
+
     async def get_by_id(self, person_id: str) -> Optional[Person]:
         person = await self._person_from_cache(person_id)
         if not person:

@@ -30,9 +30,10 @@ async def genre_details(
 @router.get("/")
 async def genres_list(
     genre_service: GenreService = Depends(get_genre_service),
+    page_size: str | None = Query(default=None, alias="page[size]"),
+    page_number: str | None = Query(default=None, alias="page[number]"),
 ) -> List[Genre]:
-
-    genres = await genre_service.list()
+    genres = await genre_service.list(page_number, page_size)
 
     if not genres:
         raise HTTPException(

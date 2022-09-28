@@ -79,10 +79,11 @@ class PersonService:
 
         return persons
 
-    async def search_person(self, query):
+    async def search_person(self, query, page_number, page_size):
         query_body = {
             "query": {"multi_match": {"query": query, "fields": ["full_name"]}},
-            "size": 2,
+            "size": page_size,
+            "from": page_number
         }
         resp = await self.elastic.search(index="persons", body=query_body)
         persons = [

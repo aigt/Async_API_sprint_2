@@ -24,9 +24,11 @@ async def persons_list(
     query_config: FilmListQueryConfig = Depends(film_list_query_config),
     person_service: PersonService = Depends(get_person_service),
     q: str | None = Query(default=None, alias="query"),
+    page_size: str | None = Query(default=None, alias="page[number]"),
+    page_number: str | None = Query(default=None, alias="page[size]"),
 ) -> List[Person]:
 
-    persons = await person_service.search_person(q)
+    persons = await person_service.search_person(q, page_number, page_size)
 
     if not persons:
         raise HTTPException(
@@ -35,7 +37,7 @@ async def persons_list(
         )
     return [
         Person(
-            uuid=person.id, full_name=person.full_name, film_ids=person.film_ids, role=q
+            uuid=person.id, full_name=person.full_name, film_ids=person.film_ids, role=person.role
         )
         for person in persons
     ]

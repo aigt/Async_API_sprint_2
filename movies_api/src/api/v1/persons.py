@@ -19,16 +19,17 @@ class Person(BaseModel):
     role: List | None
 
 
-@router.get('/{person_id}', response_model=Person)
-async def person_details(person_id: str,
-                         person_service: PersonService = Depends(get_person_service)) -> Person:
+@router.get("/{person_id}", response_model=Person)
+async def person_details(
+    person_id: str, person_service: PersonService = Depends(get_person_service)
+) -> Person:
     person = await person_service.get_by_id(person_id)
     if not person:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
     return Person(uuid=person.id, full_name=person.full_name)
 
 
-@router.get('/')
+@router.get("/")
 async def persons_list(
     query_config: FilmListQueryConfig = Depends(film_list_query_config),
     person_service: PersonService = Depends(get_person_service),
@@ -39,28 +40,38 @@ async def persons_list(
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='persons not found',
+            detail="persons not found",
         )
-    return [Person(uuid=person.id,
-                   full_name=person.full_name,
-                   film_ids=person.film_ids,
-                   role=person.role) for person in persons]
+    return [
+        Person(
+            uuid=person.id,
+            full_name=person.full_name,
+            film_ids=person.film_ids,
+            role=person.role,
+        )
+        for person in persons
+    ]
 
 
-@router.get('/search')
-async def persons_search(
+@router.get("/search", response_model=Person)
+async def persons_list(
+    query_config: FilmListQueryConfig = Depends(film_list_query_config),
     person_service: PersonService = Depends(get_person_service),
-    query: str = Query(None)
 ) -> List[Person]:
 
-    persons = await person_service.search_persons(query=query)
+    persons = await person_service.list(query_config)
 
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='persons not found',
+            detail="persons not found",
         )
-    return [Person(uuid=person.id,
-                   full_name=person.full_name,
-                   film_ids=person.film_ids,
-                   role=person.role) for person in persons]
+    return [
+        Person(
+            uuid=person.id,
+            full_name=person.full_name,
+            film_ids=person.film_ids,
+            role=person.role,
+        )
+        for person in persons
+    ]

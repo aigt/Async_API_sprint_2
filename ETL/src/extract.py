@@ -5,7 +5,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 from tenacity import retry, wait_exponential
 
-from custom_decorators import pg_reconnect
+from decorators.pg_reconnect import pg_reconnect
 
 
 class PostgresExtractor:

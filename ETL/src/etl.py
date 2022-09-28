@@ -2,7 +2,7 @@ import logging.config
 
 from core.config import get_settings
 from core.logger import LOGGING
-from custom_decorators import period
+from decorators.period import period
 from extract import PostgresExtractor
 from load import ElasticLoader
 from schemas import elastic as es_schemas

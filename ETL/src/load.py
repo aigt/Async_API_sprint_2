@@ -5,7 +5,7 @@ from typing import Any
 from elasticsearch import Elasticsearch
 from tenacity import retry, wait_exponential
 
-from custom_decorators import es_reconnect
+from decorators.es_reconnect import es_reconnect
 
 
 class ElasticLoader:

@@ -1,32 +1,3 @@
-import logging
-import os
-
-logger = logging.getLogger("logger")
-
-logging.basicConfig(
-    filename="etl.log", format="%(levelname)s:%(message)s", level=logging.WARNING
-)
-
-
-PG_DB_PATH = {
-    "dbname": os.getenv("POSTGRES_NAME"),
-    "user": os.getenv("POSTGRES_USER"),
-    "password": os.getenv("POSTGRES_PASSWORD"),
-    "host": os.getenv("POSTGRES_HOST"),
-    "port": os.getenv("POSTGRES_PORT"),
-}
-
-
-ELASTIC_PATH = os.getenv("ELASTIC_PATH")
-
-
-MOVIES_STATE_PATH = "save_movie_state.json"
-GENRES_STATE_PATH = "save_genre_state.json"
-PERSONS_STATE_PATH = "save_person_state.json"
-ALL_GENRES_STATE_PATH = 'save_all_genres_state.json'
-ALL_PERSONS_STATE_PATH = 'save_all_persons_state.json'
-
-
 ELASTIC_SETTINGS = {
     "refresh_interval": "1s",
     "analysis": {
@@ -96,7 +67,7 @@ ELASTIC_MAPPINGS_ALL_GENRES = {
     "properties": {
         "id": {"type": "keyword"},
         "name": {"type": "text"},
-    }
+    },
 }
 
 ELASTIC_MAPPINGS_ALL_PERSONS = {
@@ -104,17 +75,14 @@ ELASTIC_MAPPINGS_ALL_PERSONS = {
     "properties": {
         "id": {"type": "keyword"},
         "full_name": {"type": "text"},
-    }
+    },
 }
 
 ALL_MAPPINGS = {
     "movies": ELASTIC_MAPPINGS,
     "genres": ELASTIC_MAPPINGS_ALL_GENRES,
-    "persons": ELASTIC_MAPPINGS_ALL_PERSONS
+    "persons": ELASTIC_MAPPINGS_ALL_PERSONS,
 }
 
 
-
-ELASTIC_INDEX = {"movies": "movies",
-                 "genres": "genres",
-                 "persons": "persons"}
+ELASTIC_INDEX = {"movies": "movies", "genres": "genres", "persons": "persons"}

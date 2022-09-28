@@ -1,4 +1,6 @@
-from models import Movie, Genre, Person
+from models.genre import Genre
+from models.movie import Movie
+from models.person import Person
 
 
 class DataTransformer:

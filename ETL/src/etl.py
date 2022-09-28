@@ -1,32 +1,22 @@
 import logging.config
 
-from core.config import (
-    ALL_GENRES_STATE_PATH,
-    ALL_MAPPINGS,
-    ALL_PERSONS_STATE_PATH,
-    ELASTIC_INDEX,
-    ELASTIC_PATH,
-    ELASTIC_SETTINGS,
-    GENRES_STATE_PATH,
-    MOVIES_STATE_PATH,
-    PERSONS_STATE_PATH,
-)
+from core.config import get_settings
 from core.logger import LOGGING
 from custom_decorators import period
 from extract import PostgresExtractor
 from load import ElasticLoader
+from schemas import elastic as es_schemas
 from sql import extract_queries
 from state import JsonFileStorage, State
 from transform import DataTransformer
-from core.config import Settings
 
 # Применяем настройки логирования
 logging.config.dictConfig(LOGGING)
 
-settings = Settings()
+settings = get_settings()
 
 
-@period(10)
+@period(60 * 10)
 def etl(
     extractor: PostgresExtractor, transformer: DataTransformer, loader: ElasticLoader
 ) -> None:
@@ -40,11 +30,15 @@ def etl(
 if __name__ == "__main__":
 
     states = {
-        "movie": State(storage=JsonFileStorage(file_path=MOVIES_STATE_PATH)),
-        "genre": State(storage=JsonFileStorage(file_path=GENRES_STATE_PATH)),
-        "person": State(storage=JsonFileStorage(file_path=PERSONS_STATE_PATH)),
-        "all_genres": State(storage=JsonFileStorage(file_path=ALL_GENRES_STATE_PATH)),
-        "all_persons": State(storage=JsonFileStorage(file_path=ALL_PERSONS_STATE_PATH)),
+        "movie": State(storage=JsonFileStorage(file_path=settings.MOVIES_STATE_PATH)),
+        "genre": State(storage=JsonFileStorage(file_path=settings.GENRES_STATE_PATH)),
+        "person": State(storage=JsonFileStorage(file_path=settings.PERSONS_STATE_PATH)),
+        "all_genres": State(
+            storage=JsonFileStorage(file_path=settings.ALL_GENRES_STATE_PATH)
+        ),
+        "all_persons": State(
+            storage=JsonFileStorage(file_path=settings.ALL_PERSONS_STATE_PATH)
+        ),
     }
 
     movies_extractor = PostgresExtractor(
@@ -52,10 +46,10 @@ if __name__ == "__main__":
     )
     movies_transformer = DataTransformer()
     movies_loader = ElasticLoader(
-        conn=ELASTIC_PATH,
-        index=ELASTIC_INDEX,
-        settings=ELASTIC_SETTINGS,
-        mappings=ALL_MAPPINGS,
+        conn=settings.ELASTIC_PATH,
+        index=es_schemas.ELASTIC_INDEX,
+        settings=es_schemas.ELASTIC_SETTINGS,
+        mappings=es_schemas.ALL_MAPPINGS,
         state=states,
     )
     while True:

@@ -1,10 +1,10 @@
+import logging
 from dataclasses import asdict
 from typing import Any
 
 from elasticsearch import Elasticsearch
 from tenacity import retry, wait_exponential
 
-import logging
 from custom_decorators import es_reconnect
 
 

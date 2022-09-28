@@ -1,12 +1,11 @@
-from re import M
+import logging
 from typing import Any
 
 import psycopg2
-from custom_decorators import pg_reconnect
 from psycopg2.extras import DictCursor
 from tenacity import retry, wait_exponential
 
-import logging
+from custom_decorators import pg_reconnect
 
 
 class PostgresExtractor:

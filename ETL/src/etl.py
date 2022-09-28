@@ -1,14 +1,15 @@
 import logging.config
+import time
 
 from core.config import get_settings
 from core.logger import LOGGING
 from decorators.period import period
-from extract import PostgresExtractor
-from load import ElasticLoader
+from operations.extract import PostgresExtractor
+from operations.load import ElasticLoader
+from operations.transform import DataTransformer
 from schemas import elastic as es_schemas
-from sql import extract_queries
-from state import JsonFileStorage, State
-from transform import DataTransformer
+from sql.sql import extract_queries
+from states.state import JsonFileStorage, State
 
 # Применяем настройки логирования
 logging.config.dictConfig(LOGGING)
@@ -16,7 +17,6 @@ logging.config.dictConfig(LOGGING)
 settings = get_settings()
 
 
-@period(60 * 10)
 def etl(
     extractor: PostgresExtractor, transformer: DataTransformer, loader: ElasticLoader
 ) -> None:
@@ -30,14 +30,20 @@ def etl(
 if __name__ == "__main__":
 
     states = {
-        "movie": State(storage=JsonFileStorage(file_path=settings.MOVIES_STATE_PATH)),
-        "genre": State(storage=JsonFileStorage(file_path=settings.GENRES_STATE_PATH)),
-        "person": State(storage=JsonFileStorage(file_path=settings.PERSONS_STATE_PATH)),
+        "movie": State(
+            storage=JsonFileStorage(file_path=settings.MOVIES_STATE_PATH),
+        ),
+        "genre": State(
+            storage=JsonFileStorage(file_path=settings.GENRES_STATE_PATH),
+        ),
+        "person": State(
+            storage=JsonFileStorage(file_path=settings.PERSONS_STATE_PATH),
+        ),
         "all_genres": State(
-            storage=JsonFileStorage(file_path=settings.ALL_GENRES_STATE_PATH)
+            storage=JsonFileStorage(file_path=settings.ALL_GENRES_STATE_PATH),
         ),
         "all_persons": State(
-            storage=JsonFileStorage(file_path=settings.ALL_PERSONS_STATE_PATH)
+            storage=JsonFileStorage(file_path=settings.ALL_PERSONS_STATE_PATH),
         ),
     }
 
@@ -58,3 +64,4 @@ if __name__ == "__main__":
             transformer=movies_transformer,
             loader=movies_loader,
         )
+        time.sleep(60 * 10)

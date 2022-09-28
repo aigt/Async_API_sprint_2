@@ -13,14 +13,14 @@ class Settings(BaseSettings):
     ALL_PERSONS_STATE_PATH = 'save_all_persons_state.json'
 
     # Elasticsearch settings
-    ELASTIC_PATH: str
+    ELASTIC_PATH: str = 'http://127.0.0.1:9200'
 
     # PostgreSQL database settings
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str
-    POSTGRES_NAME: str
-    POSTGRES_PORT: int
+    POSTGRES_USER: str = 'app'
+    POSTGRES_PASSWORD: str = 'postgres'
+    POSTGRES_HOST: str = '127.0.0.1'
+    POSTGRES_NAME: str = 'postgres'
+    POSTGRES_PORT: int = 5432
     POSTGRES_DSN: Optional[PostgresDsn] = None
 
     @validator('POSTGRES_DSN', pre=True)

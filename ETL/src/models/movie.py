@@ -24,16 +24,3 @@ class Movie:
             self.description = ''
         if self.director is None:
             self.director = ''
-
-
-@dataclass
-class Genre:
-    id: uuid.UUID
-    name: str
-    modified: datetime
-
-@dataclass
-class Person:
-    id: uuid.UUID
-    full_name: str
-    modified: datetime

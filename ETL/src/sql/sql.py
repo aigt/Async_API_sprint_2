@@ -119,14 +119,12 @@ LIMIT 200;
     ORDER BY fw.modified
     LIMIT 200;
 """,
-
     "get_all_genres": """SELECT id, name, modified
 FROM content.genre
 WHERE modified > %s
 ORDER BY modified
 LIMIT 200; 
 """,
-
     "get_all_persons": """SELECT id, full_name, modified
 FROM content.person
 WHERE modified > %s

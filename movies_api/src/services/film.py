@@ -3,10 +3,11 @@ from functools import lru_cache
 from typing import Optional
 
 from aioredis import Redis
-from db.elastic import get_elastic
-from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+
+from db.elastic import get_elastic
+from db.redis import get_redis
 from models.elastic.film import Film
 from services.film_list_query_config import FilmListQueryConfig
 
@@ -14,15 +15,13 @@ FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
 
 async def film_list_es_query(query_config: FilmListQueryConfig):
+    # Пагинация
     body = {
         'size': query_config.page.size,
         'from': (query_config.page.number - 1) * query_config.page.size,
-        'query': {
-            'match_all': {},
-        },
     }
-    logging.info(body)
 
+    # Добавь сортировку, если требуется
     if query_config.sort is not None:
         body['sort'] = {
             query_config.sort.field: {
@@ -30,18 +29,29 @@ async def film_list_es_query(query_config: FilmListQueryConfig):
             },
         }
 
-    if query_config.filter is not None:
-        match query_config.filter.field:
-            case 'genre':
-                body['query'] = {
-                    'bool': {
-                        'filter': {
-                            'term': {
-                                'genre': query_config.filter.value,
-                            }
-                        },
+    # Добавь запрос и/или фильтрацию
+    if query_config.bool_q is not None:
+        boolean_query = {}
+        body['query'] = {'bool': boolean_query}
+        # Фильтрация
+        if query_config.bool_q.filter is not None:
+            # Выбор по какому полю фильтровать
+            match query_config.bool_q.filter.field:
+                case 'genre':
+                    boolean_query['filter'] = {
+                        'match': {'genre': query_config.bool_q.filter.value},
                     }
-                }
+        # Запрос
+        if query_config.bool_q.query is not None:
+            boolean_query['must'] = {
+                'query_string': {
+                    'query': query_config.bool_q.query,
+                    'fields': ['title', 'description'],
+                },
+            }
+
+    # Выборка всех, если нет запроса или фильтрации
+    body.setdefault('query', {'match_all': {}})
 
     return body
 

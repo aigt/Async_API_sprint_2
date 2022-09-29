@@ -1,11 +1,9 @@
 import uuid
-from typing import List
+
+from fastapi import Depends, Query
+from pydantic import BaseModel
 
 from core import config
-from fastapi import Depends
-from models.request.param_with_option import ParamWithOption
-from pydantic import BaseModel
-from services.query_params_with_option import get_params_with_options
 
 
 class PageConfig(BaseModel):
@@ -29,45 +27,66 @@ class SortConfig(BaseModel):
     order: str = 'asc'
 
 
+class BoolConfig(BaseModel):
+    """Конфигурация комбинации списка фильмов."""
+
+    filter: FilterConfig | None = None
+    query: str | None = None
+
+
 class FilmListQueryConfig(BaseModel):
     """Конфигурация запроса списка фильмов."""
 
-    filter: FilterConfig = None
+    bool_q: BoolConfig | None = None
     page: PageConfig = PageConfig()
     sort: SortConfig | None = None
 
 
 async def film_list_query_config(
-    query_params: List[ParamWithOption] = Depends(get_params_with_options),
+    page_size: int | None = Query(default=None, alias="page[size]"),
+    page_number: int | None = Query(default=None, alias="page[number]"),
+    sort: str | None = Query(default=None),
+    filter_genre: str | None = Query(default=None, alias="filter[genre]"),
 ) -> FilmListQueryConfig:
 
     query_config = FilmListQueryConfig()
 
-    for param in query_params:
-        match param:
-            # Параметры сортировки
-            case ParamWithOption(name='sort'):
-                query_config.sort = SortConfig()
-                sort_key = param.value
-                if sort_key.startswith('-'):
-                    query_config.sort.order = 'desc'
-                    sort_key = sort_key[1:]
-                query_config.sort.field = sort_key
+    # Параметры пагинации
+    if page_size is not None:
+        if page_size > config.MAX_PAGE_SIZE:
+            page_size = config.MAX_PAGE_SIZE
+        query_config.page.size = page_size
 
-            # Параметры пагинации
-            case ParamWithOption(name='page', option='size'):
-                page_size = int(param.value)
-                if page_size > config.MAX_PAGE_SIZE:
-                    page_size = config.MAX_PAGE_SIZE
-                query_config.page.size = int(param.value)
+    if page_number is not None:
+        query_config.page.number = page_number
 
-            case ParamWithOption(name='page', option='number'):
-                query_config.page.number = int(param.value)
+    # Параметры сортировки
+    if sort is not None:
+        query_config.sort = SortConfig()
+        sort_key = sort
+        if sort_key.startswith('-'):
+            query_config.sort.order = 'desc'
+            sort_key = sort_key[1:]
+        query_config.sort.field = sort_key
 
-            # Параметры фильтрации
-            case ParamWithOption(name='filter'):
-                query_config.filter = FilterConfig()
-                query_config.filter.field = param.option
-                query_config.filter.value = param.value
+    # Параметры фильтрации
+    if filter_genre is not None:
+        if query_config.bool_q is None:
+            query_config.bool_q = BoolConfig()
+        query_config.bool_q.filter = FilterConfig()
+        query_config.bool_q.filter.field = 'genre'
+        query_config.bool_q.filter.value = filter_genre
 
     return query_config
+
+
+def film_search_query_config(
+    query: str = Query(...),
+    list_config: FilmListQueryConfig = Depends(film_list_query_config),
+) -> FilmListQueryConfig:
+    if list_config.bool_q is None:
+        list_config.bool_q = BoolConfig()
+
+    list_config.bool_q.query = query
+
+    return list_config

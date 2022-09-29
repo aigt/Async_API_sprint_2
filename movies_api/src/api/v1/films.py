@@ -4,8 +4,13 @@ from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+
 from services.film import FilmService, get_film_service
-from services.film_list_query_config import FilmListQueryConfig, film_list_query_config
+from services.film_list_query_config import (
+    FilmListQueryConfig,
+    film_list_query_config,
+    film_search_query_config,
+)
 
 router = APIRouter()
 
@@ -19,6 +24,45 @@ class Film(BaseModel):
     actors: List[Any]
     writers: List[Any]
     director: str
+
+
+async def film_list_by_query_config(
+    query_config: FilmListQueryConfig,
+    film_service: FilmService,
+) -> List[Film]:
+    films = await film_service.list(query_config)
+    if not films:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='no film found',
+        )
+
+    return {
+        'films': [
+            Film(
+                id=film.id,
+                title=film.title,
+                imdb_rating=film.imdb_rating,
+                genre=film.genre,
+                description=film.description,
+                actors=film.actors,
+                writers=film.writers,
+                director=film.director,
+            )
+            for film in films
+        ]
+    }
+
+
+@router.get('/search')  # , response_model=List[Film])
+async def film_search(
+    query_config: FilmListQueryConfig = Depends(film_search_query_config),
+    film_service: FilmService = Depends(get_film_service),
+) -> List[Film]:
+    return await film_list_by_query_config(
+        query_config=query_config,
+        film_service=film_service,
+    )
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
@@ -56,37 +100,12 @@ async def film_details(
     )
 
 
-class SBrac(BaseModel):
-    filter: List[dict]
-
-
 @router.get('/')  # , response_model=List[Film])
 async def film_list(
     query_config: FilmListQueryConfig = Depends(film_list_query_config),
     film_service: FilmService = Depends(get_film_service),
 ) -> List[Film]:
-
-    films = await film_service.list(query_config)
-    # logging.info(films)
-
-    if not films:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='any film is not found',
-        )
-
-    return {
-        'films': [
-            Film(
-                id=film.id,
-                title=film.title,
-                imdb_rating=film.imdb_rating,
-                genre=film.genre,
-                description=film.description,
-                actors=film.actors,
-                writers=film.writers,
-                director=film.director,
-            )
-            for film in films
-        ]
-    }
+    return await film_list_by_query_config(
+        query_config=query_config,
+        film_service=film_service,
+    )

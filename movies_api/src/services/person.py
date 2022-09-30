@@ -1,21 +1,17 @@
+import uuid
 from functools import lru_cache
 from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.person import Person
-
-GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
-
-from services.film_list_query_config import FilmListQueryConfig
 from services.film import film_list_es_query
-from models.person import Person
-from pydantic import BaseModel
-import uuid
+from services.film_list_query_config import FilmListQueryConfig
 
 
 class Movie(BaseModel):
@@ -86,7 +82,7 @@ class PersonService:
         query_body = {
             "query": {"multi_match": {"query": query, "fields": ["full_name"]}},
             "size": page_size,
-            "from": from_value
+            "from": from_value,
         }
         resp = await self.elastic.search(index="persons", body=query_body)
         persons = [
@@ -113,12 +109,23 @@ class PersonService:
         return persons
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
-        person = await self._person_from_cache(person_id)
-        if not person:
-            person = await self._get_person_from_elastic(person_id)
-            if not person:
-                return None
-            await self._put_person_to_cache(person)
+        person = await self._get_person_from_elastic(person_id)
+
+        person.film_ids = await self.get_persons_films(person.full_name)
+
+        is_director = await self.get_persons_roles(person.full_name, "director")
+        is_actor = await self.get_persons_roles(person.full_name, "actors_names")
+        is_writer = await self.get_persons_roles(person.full_name, "writers_names")
+
+        roles = []
+        if is_director:
+            roles.append("Director")
+        if is_actor:
+            roles.append("Actor")
+        if is_writer:
+            roles.append("Writer")
+        person.role = roles
+
         return person
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
@@ -127,18 +134,6 @@ class PersonService:
         except NotFoundError:
             return None
         return Person(**doc["_source"])
-
-    async def _person_from_cache(self, person_id: str) -> Optional[Person]:
-        data = await self.redis.get(person_id)
-        if not data:
-            return None
-        person = Person.parse_raw(data)
-        return person
-
-    async def _put_person_to_cache(self, person: Person):
-        await self.redis.set(
-            str(person.id), person.json(), ex=GENRE_CACHE_EXPIRE_IN_SECONDS
-        )
 
 
 @lru_cache()

@@ -1,13 +1,12 @@
 import uuid
-
 from http import HTTPStatus
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 from typing import List
 
-from services.genre import GenreService, get_genre_service
-from services.film_list_query_config import FilmListQueryConfig, film_list_query_config
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
+from cache import cached
+from services.genre import GenreService, get_genre_service
 
 router = APIRouter()
 
@@ -18,13 +17,18 @@ class Genre(BaseModel):
 
 
 @router.get("/{genre_id}", response_model=Genre)
+@cached.cached_id_item(id_name='genre_id')
 async def genre_details(
-    genre_id: str, genre_service: GenreService = Depends(get_genre_service)
+    genre_id: str,
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> Genre:
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genre not found")
-    return Genre(uuid=genre.id, name=genre.name)
+    return Genre(
+        uuid=genre.id,
+        name=genre.name,
+    )
 
 
 @router.get("/")

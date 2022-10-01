@@ -1,7 +1,14 @@
 from fastapi import Depends, Query
 
-from core import config
-from models.es_query_configs.film_list_query_config import FilmListQueryConfig
+from core.config import get_settings
+from models.es_query_configs.film_list_query_config import (
+    BoolConfig,
+    FilmListQueryConfig,
+    FilterConfig,
+    SortConfig,
+)
+
+settings = get_settings()
 
 
 async def film_list_query_config(
@@ -15,8 +22,8 @@ async def film_list_query_config(
 
     # Параметры пагинации
     if page_size is not None:
-        if page_size > config.MAX_PAGE_SIZE:
-            page_size = config.MAX_PAGE_SIZE
+        if page_size > settings.max_page_size:
+            page_size = settings.max_page_size
         query_config.page.size = page_size
 
     if page_number is not None:

@@ -1,9 +1,6 @@
-import uuid
 from http import HTTPStatus
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
 from cache import cached
 from dependencies.film_list_query_config import (
@@ -12,19 +9,9 @@ from dependencies.film_list_query_config import (
 )
 from models.es_query_configs.film_list_query_config import FilmListQueryConfig
 from services.film import FilmService, get_film_service
+from api.v1.schemas import Film
 
 router = APIRouter()
-
-
-class Film(BaseModel):
-    id: uuid.UUID
-    title: str
-    imdb_rating: float
-    genre: list[Any]
-    description: str
-    actors: list[Any]
-    writers: list[Any]
-    director: str
 
 
 async def film_list_by_query_config(

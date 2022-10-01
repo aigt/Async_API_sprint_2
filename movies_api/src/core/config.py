@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     # Название проекта. Используется в Swagger-документации
     project_name: str = Field(default='movies', env='PROJECT_NAME')
 
+    API_V1_STR: str = "/api/v1"
+
     # Настройки Redis
     redis_host: str = Field(default='127.0.0.1', env='REDIS_HOST')
     redis_port: int = Field(default=6379, env='REDIS_PORT')

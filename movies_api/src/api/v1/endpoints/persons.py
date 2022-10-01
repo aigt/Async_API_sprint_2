@@ -1,22 +1,14 @@
-import uuid
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 
 from cache import cached
 from dependencies.film_list_query_config import film_list_query_config
 from models.es_query_configs.film_list_query_config import FilmListQueryConfig
 from services.person import PersonService, get_person_service
+from api.v1.schemas import Person
 
 router = APIRouter()
-
-
-class Person(BaseModel):
-    uuid: uuid.UUID
-    full_name: str
-    film_ids: list | None
-    role: list | None
 
 
 @router.get("/search", response_model=list[Person])

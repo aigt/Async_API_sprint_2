@@ -41,7 +41,7 @@ services:
         condition: service_healthy
 
   etl:
-    build: ETL
+    build: etl
     environment:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=app

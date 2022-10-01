@@ -1,6 +1,5 @@
 import uuid
 from http import HTTPStatus
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -36,7 +35,7 @@ async def genres_list(
     genre_service: GenreService = Depends(get_genre_service),
     page_size: str | None = Query(default=None, alias="page[size]"),
     page_number: str | None = Query(default=None, alias="page[number]"),
-) -> List[Genre]:
+) -> list[Genre]:
     genres = await genre_service.list(page_number, page_size)
 
     if not genres:

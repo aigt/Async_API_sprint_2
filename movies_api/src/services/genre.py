@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -24,10 +23,10 @@ class GenreService:
         genres = [Genre(**genre_doc["_source"]) for genre_doc in resp["hits"]["hits"]]
         return genres
 
-    async def get_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_by_id(self, genre_id: str) -> Genre | None:
         return await self._get_genre_from_elastic(genre_id)
 
-    async def _get_genre_from_elastic(self, genre_id: str) -> Optional[Genre]:
+    async def _get_genre_from_elastic(self, genre_id: str) -> Genre | None:
         try:
             doc = await self.elastic.get(index="genres", id=genre_id)
         except NotFoundError:

@@ -9,7 +9,7 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.elastic.film import Film
-from services.film_list_query_config import FilmListQueryConfig
+from models.es_query_configs.film_list_query_config import FilmListQueryConfig
 
 
 async def film_list_es_query(query_config: FilmListQueryConfig):

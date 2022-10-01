@@ -3,8 +3,9 @@ from __future__ import annotations
 import uuid
 from typing import List
 
-from models.elastic.base import orjson_model
 from pydantic import validator
+
+from models.base import orjson_model
 
 
 class FilmWork(orjson_model.OrjsonModel):
@@ -31,6 +32,6 @@ class FilmWork(orjson_model.OrjsonModel):
 
 
 # Чтобы не было циклического импорта
-from models.elastic import actor, director, writer  # noqa: E402, F401
+from models.elastic.film import actor, writer  # noqa: E402, F401
 
 FilmWork.update_forward_refs()

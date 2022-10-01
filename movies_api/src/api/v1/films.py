@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from cache import cached
-from services.film import FilmService, get_film_service
-from services.film_list_query_config import (
-    FilmListQueryConfig,
+from dependencies.film_list_query_config import (
     film_list_query_config,
     film_search_query_config,
 )
+from models.es_query_configs.film_list_query_config import FilmListQueryConfig
+from services.film import FilmService, get_film_service
 
 router = APIRouter()
 

@@ -9,9 +9,9 @@ from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.person import Person
+from models.elastic.person import Person
+from models.es_query_configs.film_list_query_config import FilmListQueryConfig
 from services.film import film_list_es_query
-from services.film_list_query_config import FilmListQueryConfig
 
 
 class Movie(BaseModel):

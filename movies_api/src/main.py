@@ -8,9 +8,45 @@ from api.v1 import films, genres, persons
 from core import config
 from db import elastic, redis
 
+description = """
+Асинхронный API для кинотеатра
+
+## Основные сущности
+
+* Фильм 
+* Жанр
+* Персоны:
+  * Актёр
+  * Режиссёр
+  * Сценарист
+"""
+
+tags_metadata = [
+    {
+        "name": "films",
+        "description": "Операции с фильмами.",
+    },
+    {
+        "name": "genres",
+        "description": "Операции с жанрами.",
+    },
+    {
+        "name": "persons",
+        "description": "Операции с персонами (в т.ч. актёрами, режиссёрами, сценаристами).",
+    },
+]
+
+
 app = FastAPI(
     title=config.PROJECT_NAME,
+    description=description,
+    openapi_tags=tags_metadata,
+    version="1.0.0",
     docs_url='/api/openapi',
+    contact={
+        "name": "Ссылка на репозиторий GitHub",
+        "url": "https://github.com/aigt/Async_API_sprint_1",
+    },
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
 )

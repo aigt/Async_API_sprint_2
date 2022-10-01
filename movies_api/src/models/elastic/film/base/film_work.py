@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from typing import List
 
 from pydantic import validator
 
@@ -14,12 +13,12 @@ class FilmWork(orjson_model.OrjsonModel):
     id: uuid.UUID
     imdb_rating: float | None
     title: str
-    genre: List[str]
+    genre: list[str]
     description: str | None
-    actors_names: List[str] | None
-    writers_names: List[str] | None
-    actors: List[actor.Actor]
-    writers: List[writer.Writer]
+    actors_names: list[str] | None
+    writers_names: list[str] | None
+    actors: list[actor.Actor]
+    writers: list[writer.Writer]
     director: str
 
     @validator('description')

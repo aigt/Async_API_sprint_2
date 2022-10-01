@@ -1,6 +1,5 @@
 import uuid
 from functools import lru_cache
-from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -108,7 +107,7 @@ class PersonService:
 
         return persons
 
-    async def get_by_id(self, person_id: str) -> Optional[Person]:
+    async def get_by_id(self, person_id: str) -> Person | None:
         person = await self._get_person_from_elastic(person_id)
 
         person.film_ids = await self.get_persons_films(person.full_name)
@@ -128,7 +127,7 @@ class PersonService:
 
         return person
 
-    async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
+    async def _get_person_from_elastic(self, person_id: str) -> Person | None:
         try:
             doc = await self.elastic.get(index="persons", id=person_id)
         except NotFoundError:

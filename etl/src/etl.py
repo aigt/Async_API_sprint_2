@@ -3,7 +3,6 @@ import time
 
 from core.config import get_settings
 from core.logger import LOGGING
-from decorators.period import period
 from operations.extract import PostgresExtractor
 from operations.load import ElasticLoader
 from operations.transform import DataTransformer

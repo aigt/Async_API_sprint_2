@@ -1,4 +1,4 @@
-from models.elastic.base import person
+from models.elastic.film.base import person
 
 
 class Writer(person.Person):

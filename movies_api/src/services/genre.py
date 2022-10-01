@@ -7,7 +7,7 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.genre import Genre
+from models.elastic.genre import Genre
 
 
 class GenreService:

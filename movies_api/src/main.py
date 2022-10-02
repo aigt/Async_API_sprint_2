@@ -1,19 +1,27 @@
+from logging import config as logging_config
+
 import aioredis
 import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from api.v1 import films, genres, persons
-from core import config
+from api.v1.api import api_router
+from core.config import get_settings
+from core.logger import LOGGING
 from db import elastic, redis
+
+# Применяем настройки логирования
+logging_config.dictConfig(LOGGING)
+
+settings = get_settings()
 
 description = """
 Асинхронный API для кинотеатра
 
 ## Основные сущности
 
-* Фильм 
+* Фильм
 * Жанр
 * Персоны:
   * Актёр
@@ -38,7 +46,7 @@ tags_metadata = [
 
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
+    title=settings.project_name,
     description=description,
     openapi_tags=tags_metadata,
     version="1.0.0",
@@ -54,11 +62,9 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = await aioredis.Redis.from_url(
-        f'redis://{config.REDIS_HOST}:{config.REDIS_PORT}'
-    )
+    redis.redis = await aioredis.Redis.from_url(settings.redis_dsn)
     elastic.es = AsyncElasticsearch(
-        hosts=[f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
+        hosts=[f'http://{settings.elastic_host}:{settings.elastic_port}']
     )
 
 
@@ -69,11 +75,8 @@ async def shutdown():
     await elastic.es.close()
 
 
-# Подключаем роутер к серверу, указав префикс /v1/films
-# Теги указываем для удобства навигации по документации
-app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
-app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])
-app.include_router(persons.router, prefix='/api/v1/persons', tags=['persons'])
+# Подключаем роутер к серверу
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 if __name__ == '__main__':

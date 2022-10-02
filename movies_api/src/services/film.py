@@ -62,13 +62,8 @@ class FilmService:
         self,
         query_config: FilmListQueryConfig,
     ) -> list[Film]:
-
-        logging.info(query_config)
-
         body = await film_list_es_query(query_config)
-
         resp = await self.elastic.search(index="movies", body=body)
-        logging.info(resp)
 
         films = [Film(**film_doc['_source']) for film_doc in resp['hits']['hits']]
         return films

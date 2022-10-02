@@ -75,7 +75,6 @@ async def shutdown():
     await elastic.es.close()
 
 
-# Подключаем роутер к серверу
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 

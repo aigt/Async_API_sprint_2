@@ -3,9 +3,6 @@ from typing import Any
 
 from pydantic import BaseSettings, Field, RedisDsn, validator
 
-# Корень проекта
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 class Settings(BaseSettings):
 
@@ -15,6 +12,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Настройки Redis
+    CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
     redis_host: str = Field(default='127.0.0.1', env='REDIS_HOST')
     redis_port: int = Field(default=6379, env='REDIS_PORT')
 

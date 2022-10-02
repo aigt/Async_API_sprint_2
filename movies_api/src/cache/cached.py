@@ -1,9 +1,10 @@
 import logging
 from functools import wraps
 
+from core.config import get_settings
 from db.redis import get_redis
 
-CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+settings = get_settings()
 
 
 def cached_id_item(*, id_name: str):
@@ -32,7 +33,7 @@ def cached_id_item(*, id_name: str):
                 await redis.set(
                     key,
                     data,
-                    ex=CACHE_EXPIRE_IN_SECONDS,
+                    ex=settings.CACHE_EXPIRE_IN_SECONDS,
                 )
 
             logging.info(f'data with key {key}: {data}')

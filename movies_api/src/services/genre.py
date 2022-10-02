@@ -14,10 +14,10 @@ class GenreService:
         self.redis = redis
         self.elastic = elastic
 
-    async def list(self, page_number, page_size) -> list[Genre]:
+    async def list(self, page_number: int, page_size: int) -> list[Genre]:
         from_value = None
         if page_size and page_size:
-            from_value = int(page_number) * int(page_size) - 3
+            from_value = (page_number - 1) * page_size
         query_body = {"query": {"match_all": {}}, "size": page_size, "from": from_value}
         resp = await self.elastic.search(index="genres", body=query_body)
         genres = [Genre(**genre_doc["_source"]) for genre_doc in resp["hits"]["hits"]]

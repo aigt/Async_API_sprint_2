@@ -9,8 +9,6 @@ from pydantic import BaseModel
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.elastic.person import Person
-from models.es_query_configs.film_list_query_config import FilmListQueryConfig
-from services.film import film_list_es_query
 
 
 class Movie(BaseModel):
@@ -48,9 +46,15 @@ class PersonService:
         ]
         return roles_list
 
-    async def list(self, query_config: FilmListQueryConfig):
-        body = await film_list_es_query(query_config)
-        resp = await self.elastic.search(index="persons", body=body)
+    async def list(self, page_size: int, page_number: int):
+        if page_size and page_size:
+            from_value = (page_number - 1) * page_size
+        query_body = {
+            "query": {'match_all': {}},
+            "size": page_size,
+            "from": from_value,
+        }
+        resp = await self.elastic.search(index="persons", body=query_body)
         persons = [
             Person(**person_doc["_source"]) for person_doc in resp["hits"]["hits"]
         ]
@@ -74,10 +78,10 @@ class PersonService:
 
         return persons
 
-    async def search_person(self, query, page_number, page_size):
+    async def search_person(self, query, page_number: int, page_size: int):
         from_value = None
         if page_size and page_size:
-            from_value = int(page_number) * int(page_size) - 3
+            from_value = (page_number - 1) * page_size
         query_body = {
             "query": {"multi_match": {"query": query, "fields": ["full_name"]}},
             "size": page_size,

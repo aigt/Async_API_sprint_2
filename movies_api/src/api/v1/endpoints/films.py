@@ -1,11 +1,10 @@
-import uuid
 from http import HTTPStatus
-from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
+from api.v1.schemas import Film
 from cache import cached
+from core import text_messages
 from dependencies.film_list_query_config import (
     film_list_query_config,
     film_search_query_config,
@@ -16,26 +15,15 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-class Film(BaseModel):
-    id: uuid.UUID
-    title: str
-    imdb_rating: float
-    genre: List[Any]
-    description: str
-    actors: List[Any]
-    writers: List[Any]
-    director: str
-
-
 async def film_list_by_query_config(
     query_config: FilmListQueryConfig,
     film_service: FilmService,
-) -> List[Film]:
+) -> list[Film]:
     films = await film_service.list(query_config)
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='no film found',
+            detail=text_messages.FILMS_NOT_FOUND,
         )
 
     return [
@@ -53,11 +41,11 @@ async def film_list_by_query_config(
     ]
 
 
-@router.get('/search', response_model=List[Film])
+@router.get('/search', response_model=list[Film])
 async def film_search(
     query_config: FilmListQueryConfig = Depends(film_search_query_config),
     film_service: FilmService = Depends(get_film_service),
-) -> List[Film]:
+) -> list[Film]:
     return await film_list_by_query_config(
         query_config=query_config,
         film_service=film_service,
@@ -73,7 +61,7 @@ async def film_details(
     if not film:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='film not found',
+            detail=text_messages.FILM_NOT_FOUND,
         )
 
     return Film(
@@ -88,11 +76,11 @@ async def film_details(
     )
 
 
-@router.get('/', response_model=List[Film])
+@router.get('/', response_model=list[Film])
 async def film_list(
     query_config: FilmListQueryConfig = Depends(film_list_query_config),
     film_service: FilmService = Depends(get_film_service),
-) -> List[Film]:
+) -> list[Film]:
     return await film_list_by_query_config(
         query_config=query_config,
         film_service=film_service,

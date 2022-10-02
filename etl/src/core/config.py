@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import BaseSettings, PostgresDsn, validator
 
@@ -21,10 +21,10 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = '127.0.0.1'
     POSTGRES_NAME: str = 'postgres'
     POSTGRES_PORT: int = 5432
-    POSTGRES_DSN: Optional[PostgresDsn] = None
+    POSTGRES_DSN: PostgresDsn | None = None
 
     @validator('POSTGRES_DSN', pre=True)
-    def create_postgres_uri(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+    def create_postgres_uri(cls, v: str | None, values: dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
         return PostgresDsn.build(

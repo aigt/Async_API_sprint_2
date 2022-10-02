@@ -1,11 +1,10 @@
-import uuid
 from http import HTTPStatus
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 
+from api.v1.schemas import Person
 from cache import cached
+from core import text_messages
 from dependencies.film_list_query_config import film_list_query_config
 from models.es_query_configs.film_list_query_config import FilmListQueryConfig
 from services.person import PersonService, get_person_service
@@ -13,27 +12,20 @@ from services.person import PersonService, get_person_service
 router = APIRouter()
 
 
-class Person(BaseModel):
-    uuid: uuid.UUID
-    full_name: str
-    film_ids: List | None
-    role: List | None
-
-
-@router.get("/search", response_model=List[Person])
+@router.get("/search", response_model=list[Person])
 async def persons_search(
     query: str,
     page_size: str | None = Query(default=None, alias="page[size]"),
     page_number: str | None = Query(default=None, alias="page[number]"),
     person_service: PersonService = Depends(get_person_service),
-) -> List[Person]:
+) -> list[Person]:
 
     persons = await person_service.search_person(query, page_number, page_size)
 
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="persons not found",
+            detail=text_messages.PERSONS_NOT_FOUND,
         )
     return [
         Person(
@@ -53,7 +45,9 @@ async def person_details(
 ) -> Person:
     person = await person_service.get_by_id(person_id)
     if not person:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail=text_messages.PERSON_NOT_FOUND
+        )
     return Person(
         uuid=person.id,
         full_name=person.full_name,
@@ -66,14 +60,14 @@ async def person_details(
 async def persons_list(
     query_config: FilmListQueryConfig = Depends(film_list_query_config),
     person_service: PersonService = Depends(get_person_service),
-) -> List[Person]:
+) -> list[Person]:
 
     persons = await person_service.list(query_config)
 
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="persons not found",
+            detail=text_messages.PERSONS_NOT_FOUND,
         )
     return [
         Person(

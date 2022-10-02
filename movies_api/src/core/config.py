@@ -1,24 +1,42 @@
-import os
-from logging import config as logging_config
+from functools import lru_cache
+from typing import Any
 
-from core.logger import LOGGING
+from pydantic import BaseSettings, Field, RedisDsn, validator
 
-# Применяем настройки логирования
-logging_config.dictConfig(LOGGING)
 
-# Название проекта. Используется в Swagger-документации
-PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
+class Settings(BaseSettings):
 
-# Настройки Redis
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+    # Название проекта. Используется в Swagger-документации
+    project_name: str = Field(default='movies', env='PROJECT_NAME')
 
-# Настройки Elasticsearch
-ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
-ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
+    API_V1_STR: str = "/api/v1"
 
-# Корень проекта
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Настройки Redis
+    CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
-# Максимальное количество элементов на странице
-MAX_PAGE_SIZE = 50
+    redis_host: str = Field(default='127.0.0.1', env='REDIS_HOST')
+    redis_port: int = Field(default=6379, env='REDIS_PORT')
+
+    redis_dsn: RedisDsn | None = None
+
+    @validator('redis_dsn', pre=True)
+    def create_redis_dsn(cls, v: str | None, values: dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return RedisDsn.build(
+            scheme='redis',
+            host=values.get('redis_host'),
+            port=f'{values.get("redis_port")}',
+        )
+
+    # Настройки Elasticsearch
+    elastic_host: str = Field(default='127.0.0.1', env='ELASTIC_HOST')
+    elastic_port: int = Field(default=9200, env='ELASTIC_PORT')
+
+    # Максимальное количество элементов на странице
+    max_page_size: int = Field(default=50)
+
+
+@lru_cache()
+def get_settings():
+    return Settings()

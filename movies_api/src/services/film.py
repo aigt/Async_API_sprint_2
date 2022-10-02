@@ -1,6 +1,5 @@
 import logging
 from functools import lru_cache
-from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -63,21 +62,16 @@ class FilmService:
         self,
         query_config: FilmListQueryConfig,
     ) -> list[Film]:
-
-        logging.info(query_config)
-
         body = await film_list_es_query(query_config)
-
         resp = await self.elastic.search(index="movies", body=body)
-        logging.info(resp)
 
         films = [Film(**film_doc['_source']) for film_doc in resp['hits']['hits']]
         return films
 
-    async def get_by_id(self, film_id: str) -> Optional[Film]:
+    async def get_by_id(self, film_id: str) -> Film | None:
         return await self._get_film_from_elastic(film_id)
 
-    async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
+    async def _get_film_from_elastic(self, film_id: str) -> Film | None:
         try:
             doc = await self.elastic.get(index='movies', id=film_id)
         except NotFoundError:

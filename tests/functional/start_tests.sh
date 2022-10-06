@@ -2,6 +2,6 @@
 
 cd /opt/app/
 
-python src/main.py
+python src/test_search.py
 
 exec "$@"

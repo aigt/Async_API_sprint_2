@@ -1,26 +1,23 @@
-from http import HTTPStatus
 import uuid as uuid_m
+from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.v1.schemas import Film
 from cache import cached
 from core import text_messages
-from dependencies.film_list_query_config import (
-    film_list_query_config,
-    film_search_query_config,
-)
-from models.es_query_configs.film_list_query_config import FilmListQueryConfig
+from dependencies.film_list_query_body import (film_list_query_body,
+                                               film_search_query_body)
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
 
 
-async def film_list_by_query_config(
-    query_config: FilmListQueryConfig,
+async def film_list_by_query(
+    query_body: dict,
     film_service: FilmService,
 ) -> list[Film]:
-    films = await film_service.list(query_config)
+    films = await film_service.list(query_body=query_body)
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -48,7 +45,7 @@ async def film_list_by_query_config(
     summary="Найти фильмы по запросу",
 )
 async def film_search(
-    query_config: FilmListQueryConfig = Depends(film_search_query_config),
+    query_body: dict = Depends(film_search_query_body),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
     """
@@ -64,8 +61,8 @@ async def film_search(
     - **director**: режиссёры
     """
 
-    return await film_list_by_query_config(
-        query_config=query_config,
+    return await film_list_by_query(
+        query_body=query_body,
         film_service=film_service,
     )
 
@@ -121,7 +118,7 @@ async def film_details(
     summary="Получить список фильмов",
 )
 async def film_list(
-    query_config: FilmListQueryConfig = Depends(film_list_query_config),
+    query_body: dict = Depends(film_list_query_body),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
     """
@@ -136,7 +133,7 @@ async def film_list(
     - **writers**: сценаристы
     - **director**: режиссёры
     """
-    return await film_list_by_query_config(
-        query_config=query_config,
+    return await film_list_by_query(
+        query_body=query_body,
         film_service=film_service,
     )

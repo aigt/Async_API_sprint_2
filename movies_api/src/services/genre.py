@@ -1,17 +1,14 @@
 from functools import lru_cache
 
-from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 
 from db.elastic import get_elastic
-from db.redis import get_redis
 from models.elastic.genre import Genre
 
 
 class GenreService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
+    def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
     async def list(self, page_number: int, page_size: int) -> list[Genre]:
@@ -36,7 +33,6 @@ class GenreService:
 
 @lru_cache()
 def get_genre_service(
-    redis: Redis = Depends(get_redis),
     elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    return GenreService(elastic)

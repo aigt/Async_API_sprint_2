@@ -2,6 +2,6 @@
 
 cd /opt/app/
 
-python src/test_search.py
+pytest
 
 exec "$@"

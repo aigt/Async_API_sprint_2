@@ -1,9 +1,9 @@
 from fastapi import Depends
 
 from core.config import get_settings
-from dependencies.film_list_query_config import (film_list_query_config,
-                                                 film_search_query_config)
 from models.es_query_configs.film_list_query_config import FilmListQueryConfig
+from services.film.film_list_query_config import (film_list_query_config,
+                                                  film_search_query_config)
 
 settings = get_settings()
 
@@ -52,12 +52,12 @@ async def _build_film_list_es_query_body(query_config: FilmListQueryConfig) -> d
 
 async def film_list_query_body(
     list_config: FilmListQueryConfig = Depends(film_list_query_config)
-) -> FilmListQueryConfig:
-    return _build_film_list_es_query_body(list_config)
+) -> dict:
+    return await _build_film_list_es_query_body(list_config)
     
 
 async def film_search_query_body(
     list_config: FilmListQueryConfig = Depends(film_search_query_config)
-) -> FilmListQueryConfig:
-    return _build_film_list_es_query_body(list_config)
+) -> dict:
+    return await _build_film_list_es_query_body(list_config)
     

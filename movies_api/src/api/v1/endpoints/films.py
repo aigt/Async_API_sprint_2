@@ -1,42 +1,13 @@
-import uuid as uuid_m
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.schemas import Film
 from cache import cached
 from core import text_messages
-from dependencies.film_list_query_body import (film_list_query_body,
-                                               film_search_query_body)
-from services.film import FilmService, get_film_service
+from services import film as service
 
 router = APIRouter()
-
-
-async def film_list_by_query(
-    query_body: dict,
-    film_service: FilmService,
-) -> list[Film]:
-    films = await film_service.list(query_body=query_body)
-    if not films:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=text_messages.FILMS_NOT_FOUND,
-        )
-
-    return [
-        Film(
-            id=film.id,
-            title=film.title,
-            imdb_rating=film.imdb_rating,
-            genre=film.genre,
-            description=film.description,
-            actors=film.actors,
-            writers=film.writers,
-            director=film.director,
-        )
-        for film in films
-    ]
 
 
 @router.get(
@@ -44,9 +15,8 @@ async def film_list_by_query(
     response_model=list[Film],
     summary="Найти фильмы по запросу",
 )
-async def film_search(
-    query_body: dict = Depends(film_search_query_body),
-    film_service: FilmService = Depends(get_film_service),
+async def search_films(
+    film_list: list[Film] = Depends(service.search_films),
 ) -> list[Film]:
     """
     Найти фильмы по запросу с полной информацией:
@@ -60,11 +30,12 @@ async def film_search(
     - **writers**: сценаристы
     - **director**: режиссёры
     """
-
-    return await film_list_by_query(
-        query_body=query_body,
-        film_service=film_service,
-    )
+    if not film_list:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=text_messages.FILMS_NOT_FOUND,
+        )
+    return film_list
 
 
 @router.get(
@@ -73,13 +44,8 @@ async def film_search(
     summary="Получить фильм",
 )
 @cached.cached_id_item(id_name='film_id')
-async def film_details(
-    film_id: uuid_m.UUID = Query(
-        ...,
-        title="Идентификатор",
-        description="Идентификатор под которым фильм хранится в БД",
-    ),
-    film_service: FilmService = Depends(get_film_service),
+async def get_film_by_id(
+    film: Film = Depends(service.get_film_by_id),
 ) -> Film:
     """
     Получить фильм с полной информацией:
@@ -93,23 +59,12 @@ async def film_details(
     - **writers**: сценаристы
     - **director**: режиссёры
     """
-    film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=text_messages.FILM_NOT_FOUND,
         )
-
-    return Film(
-        id=film.id,
-        title=film.title,
-        imdb_rating=film.imdb_rating,
-        genre=film.genre,
-        description=film.description,
-        actors=film.actors,
-        writers=film.writers,
-        director=film.director,
-    )
+    return film
 
 
 @router.get(
@@ -118,8 +73,7 @@ async def film_details(
     summary="Получить список фильмов",
 )
 async def film_list(
-    query_body: dict = Depends(film_list_query_body),
-    film_service: FilmService = Depends(get_film_service),
+    film_list: list[Film] = Depends(service.get_film_list),
 ) -> list[Film]:
     """
     Получить список фильмов с полной информацией:
@@ -133,7 +87,9 @@ async def film_list(
     - **writers**: сценаристы
     - **director**: режиссёры
     """
-    return await film_list_by_query(
-        query_body=query_body,
-        film_service=film_service,
-    )
+    if not film_list:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=text_messages.FILMS_NOT_FOUND,
+        )
+    return film_list

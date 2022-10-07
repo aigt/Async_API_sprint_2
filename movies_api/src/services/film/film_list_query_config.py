@@ -20,6 +20,7 @@ async def film_list_query_config(
         alias="page[number]",
         title="Номер страницы",
         description="Номер страницы, которую загрузить",
+        ge=1,
     ),
     sort: str
     | None = Query(

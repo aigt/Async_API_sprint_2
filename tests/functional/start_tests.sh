@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /opt/app/
+cd /opt/app/tests/functional
 
 pytest
 

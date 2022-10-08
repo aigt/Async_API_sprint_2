@@ -40,34 +40,20 @@ class PostgresExtractor:
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:
             last_modified = state.get_state("modified")
-
-        cursor.execute(query, (last_modified,))
+            
+        cursor.execute(
+            query,
+            {
+                'batch_size': 1000,
+                'modified_from': last_modified,
+            },
+        )
+        
         data = cursor.fetchall()
         if data:
             modified = data[len(data) - 1]["modified"]
             self.movie_modified = modified
             return data
-        return []
-
-    def get_genres_persons_changes(
-        self, cursor, id_query, movie_id_query, movie_query, state
-    ):
-        if state.is_empty():
-            last_modified = "1000-01-01 00:00:00.222397+00"
-        else:
-            last_modified = state.get_state("modified")
-        cursor.execute(id_query, (last_modified,))
-        data = cursor.fetchall()
-        if data:
-            persons_id = tuple(i["id"] for i in data)
-            modified = data[len(data) - 1]["modified"]
-            cursor.execute(movie_id_query, (persons_id,))
-            persons_movies_id = cursor.fetchall()
-            pretty_persons_movies_id = tuple(i["id"] for i in persons_movies_id)
-            cursor.execute(movie_query, (pretty_persons_movies_id,))
-            movies_with_changed_details = cursor.fetchall()
-            state.set_state(key="modified", value=modified)
-            return movies_with_changed_details
         return []
 
     def get_all_genres_persons(self, cursor, query, state):
@@ -96,22 +82,6 @@ class PostgresExtractor:
             cursor=pg_curs,
             query=self.query["get_modified_movies"],
             state=self.state["movie"],
-        )
-
-        data += self.get_genres_persons_changes(
-            cursor=pg_curs,
-            id_query=self.query["get_persons_id"],
-            movie_id_query=self.query["get_movies_id_with_modified_persons"],
-            movie_query=self.query["get_movies_with_modified_persons_or_genres"],
-            state=self.state["person"],
-        )
-
-        data += self.get_genres_persons_changes(
-            cursor=pg_curs,
-            id_query=self.query["get_genres_id"],
-            movie_id_query=self.query["get_movies_id_with_modified_genres"],
-            movie_query=self.query["get_movies_with_modified_persons_or_genres"],
-            state=self.state["genre"],
         )
 
         genres_data = self.get_all_genres_persons(

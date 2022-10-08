@@ -62,7 +62,13 @@ class PostgresExtractor:
         else:
             last_modified = state.get_state("modified")
 
-        cursor.execute(query, (last_modified,))
+        cursor.execute(
+            query,
+            {
+                'batch_size': 5000,
+                'modified_from': last_modified,
+            },
+        )
         data = cursor.fetchall()
         if data:
             modified = data[len(data) - 1]["modified"]

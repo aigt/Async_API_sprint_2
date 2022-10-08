@@ -12,6 +12,6 @@ class DataTransformer:
 
         validated_data_all_genres = [Genre(*dict(i).values()) for i in data[1]]
 
-        validated_data_all_persons = [Person(*dict(i).values()) for i in data[2]]
+        validated_data_all_persons = [Person(**person) for person in data[2]]
 
         return (validated_data, validated_data_all_genres, validated_data_all_persons)

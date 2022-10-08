@@ -62,6 +62,12 @@ class ElasticLoader:
                 settings=self.settings,
                 mappings=self.mappings['genres'],
             )
+        if not self._connection.indices.exists(index=self.index['persons_v2']):
+            self._connection.indices.create(
+                index=self.index['persons_v2'],
+                settings=self.settings,
+                mappings=self.mappings['persons_v2'],
+            )
 
         if dataclass_data[0]:
             row_count = len(dataclass_data[0])
@@ -117,21 +123,21 @@ class ElasticLoader:
             row_count = len(dataclass_data[2])
             for number in range(row_count):
                 doc_id = dataclass_data[2][number].id
-                doc_data = asdict(dataclass_data[2][number])
+                doc_data = dataclass_data[2][number].dict()
                 modified_data = doc_data.pop("modified")
 
-                if self._connection.exists(index=self.index['persons'], id=doc_id):
+                if self._connection.exists(index=self.index['persons_v2'], id=doc_id):
                     updated_data = doc_data
 
                     self._connection.update(
-                        index=self.index['persons'],
+                        index=self.index['persons_v2'],
                         body={"doc": updated_data},
                         id=doc_id,
                     )
                     logging.info(f"document {doc_id} was updated.")
                 else:
                     self._connection.create(
-                        index=self.index['persons'],
+                        index=self.index['persons_v2'],
                         document=doc_data,
                         id=doc_id,
                     )

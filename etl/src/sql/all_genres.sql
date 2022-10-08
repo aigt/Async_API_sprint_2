@@ -4,8 +4,8 @@ SELECT  id,
 
 FROM    content.genre
 
-WHERE   modified > %s
+WHERE   modified > %(modified_from)s
 
 ORDER BY    modified
 
-LIMIT   5000;
+LIMIT   %(batch_size)s;

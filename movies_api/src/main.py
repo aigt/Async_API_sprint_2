@@ -49,7 +49,7 @@ app = FastAPI(
     title=settings.project_name,
     description=description,
     openapi_tags=tags_metadata,
-    version="1.0.0",
+    version="1.1.0",
     docs_url='/api/openapi',
     contact={
         "name": "Ссылка на репозиторий GitHub",

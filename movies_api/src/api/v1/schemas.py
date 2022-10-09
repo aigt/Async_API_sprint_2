@@ -85,3 +85,24 @@ class Person(BaseModel):
         title='Список должностей',
         description='Список должностей, которые занимала данная персона',
     )
+
+
+class PersonFilm(BaseModel):
+    """Схема фильмов в которых учавствовала персона."""
+
+    uuid: uuid_m.UUID = Field(
+        title='Идентификатор',
+        description='Идентификатор под которым фильм персоны хранится в БД',
+    )
+    title: str = Field(
+        title='Название фильма',
+        description='Официальное название фильма',
+    )
+    imdb_rating: float = Field(
+        title='IMDb рейтинг фильма',
+        description='Рейтинг фильма с сайта Internet Movie Database (IMDb)',
+    )
+    role: str = Field(
+        title='Должность',
+        description='На какой должности персона участвовала в фильме',
+    )

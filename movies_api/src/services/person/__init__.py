@@ -3,15 +3,18 @@ import logging
 import uuid as uuid_m
 from typing import Any
 
-from fastapi import Depends, Path
+from fastapi import Depends, Path, Query
 
-from api.v1.schemas import Person
+from api.v1.schemas import Person, PersonFilm
 from cache import cached
+from core.config import get_settings
 from models.elastic.person import Person as ElasticPerson
 from models.elastic.person import Role as ElasticRole
 from repositories.elastic import ElastisearchRepository, get_person_repository
 from services.person.person_list_query_body import (person_list_query_body,
                                                     person_search_query_body)
+
+settings = get_settings()
 
 
 def _reduce_person_role(roles_acc: dict[str, set[Any]], role: ElasticRole) -> dict:
@@ -75,3 +78,42 @@ async def get_person_by_id(
     if not person:
         return None
     return _map_person(person)
+
+
+async def get_person_films(
+    person_id: uuid_m.UUID = Path(
+        ...,
+        title="Идентификатор",
+        description="Идентификатор под которым фильм хранится в БД",
+    ),
+    page_size: int = Query(
+        default=20,
+        alias="page[size]",
+        title="Размер списка",
+        description="Количество элементов выдаваемых на одной странице",
+        le=settings.max_page_size,
+    ),
+    page_number: int = Query(
+        default=1,
+        alias="page[number]",
+        title="Номер страницы",
+        description="Номер страницы, которую загрузить",
+        ge=1,
+    ),
+    person_repo: ElastisearchRepository[ElasticPerson] = Depends(get_person_repository),
+) -> list[PersonFilm]:
+    person = await person_repo.get_by_id(person_id)
+    length = len(person.roles)
+    from_film = min(length - 1, (page_number - 1) * page_size)
+    to_film = min(length, from_film + page_size) 
+    if not person:
+        return None
+    return [
+        PersonFilm(
+            uuid=film.film_id,
+            title=film.film_title,
+            imdb_rating=film.film_imdb_rating,
+            role=film.role,
+        )
+        for film in person.roles[from_film:to_film]
+    ]

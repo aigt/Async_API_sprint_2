@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.schemas import Person
+from api.v1.schemas import Person, PersonFilm
 from core import text_messages
 from services import person as service
 
@@ -55,6 +55,30 @@ async def person_details(
             detail=text_messages.PERSON_NOT_FOUND,
         )
     return person
+
+
+@router.get(
+    "/{person_id}/film",
+    response_model=list[PersonFilm],
+    summary="Получить список фильмов персоны",
+)
+async def person_films(
+    film_list: PersonFilm | None = Depends(service.get_person_films),
+) -> list[PersonFilm]:
+    """
+    Получить список фильмов персон с частичной информацией:
+
+    - **uuid**: идентификатор
+    - **title**: название фильма
+    - **imdb_rating**: imdb рейтинг фильма
+    - **role**: жанры фильма
+    """
+    if not film_list:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=text_messages.PERSON_FILMS_NOT_FOUND,
+        )
+    return film_list
 
 
 @router.get(

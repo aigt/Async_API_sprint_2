@@ -6,3 +6,5 @@ GENRES_NOT_FOUND = 'genres not found'
 
 PERSON_NOT_FOUND = 'person not found'
 PERSONS_NOT_FOUND = 'persons not found'
+
+PERSON_FILMS_NOT_FOUND = 'person films not found'

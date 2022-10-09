@@ -47,3 +47,11 @@ ES_PERSONS_MAP = {
         "full_name": {"type": "text"},
     },
 }
+
+ES_INDEXES = {
+    'films': 'movies',
+    'films_search': 'movies',
+    'genres': 'genres',
+    'persons': 'persons',
+    'persons_search': 'persons'
+}

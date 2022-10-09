@@ -10,10 +10,10 @@ from tests.functional.testdata.load_to_es_data import es_films_search, es_films
 @pytest.mark.asyncio
 async def test_films(es_write_data, make_get_request):
     bulk_query = get_es_bulk_query(data=es_films,
-                                   index=test_settings.es_index,
+                                   index=test_settings.es_index['films'],
                                    id_field=test_settings.es_id_field)
 
-    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index)
+    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index['films'])
     url = test_settings.service_url + '/api/v1/films'
 
     # проверка успешного вывода всех фильмов

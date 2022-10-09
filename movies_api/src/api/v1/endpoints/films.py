@@ -43,7 +43,7 @@ async def search_films(
     summary="Получить фильм",
 )
 async def get_film_by_id(
-    film: Film = Depends(service.get_film_by_id),
+    film: Film | None = Depends(service.get_film_by_id),
 ) -> Film:
     """
     Получить фильм с полной информацией:

@@ -1,147 +1,77 @@
-import uuid
-from functools import lru_cache
+import functools
+import logging
+import uuid as uuid_m
+from typing import Any
 
-from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends
-from pydantic import BaseModel
+from fastapi import Depends, Path
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.elastic.person import Person
-
-
-class Movie(BaseModel):
-    id: uuid.UUID
-
-
-class PersonService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
-
-    async def get_persons_films(self, name: str):
-        query_body = {
-            "query": {
-                "multi_match": {
-                    "query": name,
-                    "fields": ["actors_names", "writers_names", "director"],
-                }
-            }
-        }
-        resp = await self.elastic.search(index="movies", body=query_body)
-        persons_films = [
-            Movie(**film_doc["_source"]).id for film_doc in resp["hits"]["hits"]
-        ]
-        return persons_films
-
-    async def get_persons_roles(self, name: str, role_to_check: str):
-        check_role_query = {
-            "query": {"bool": {"must": {"match": {role_to_check: name}}}}
-        }
-
-        resp = await self.elastic.search(index="movies", body=check_role_query)
-        roles_list = [
-            Movie(**film_doc["_source"]).id for film_doc in resp["hits"]["hits"]
-        ]
-        return roles_list
-
-    async def list(self, page_size: int, page_number: int):
-        if page_size and page_size:
-            from_value = (page_number - 1) * page_size
-        query_body = {
-            "query": {'match_all': {}},
-            "size": page_size,
-            "from": from_value,
-        }
-        resp = await self.elastic.search(index="persons", body=query_body)
-        persons = [
-            Person(**person_doc["_source"]) for person_doc in resp["hits"]["hits"]
-        ]
-
-        for person in persons:
-            person_films = await self.get_persons_films(person.full_name)
-            person.film_ids = person_films
-
-            is_director = await self.get_persons_roles(person.full_name, "director")
-            is_actor = await self.get_persons_roles(person.full_name, "actors_names")
-            is_writer = await self.get_persons_roles(person.full_name, "writers_names")
-
-            roles = []
-            if is_director:
-                roles.append("Director")
-            if is_actor:
-                roles.append("Actor")
-            if is_writer:
-                roles.append("Writer")
-            person.role = roles
-
-        return persons
-
-    async def search_person(self, query, page_number: int, page_size: int):
-        from_value = None
-        if page_size and page_size:
-            from_value = (page_number - 1) * page_size
-        query_body = {
-            "query": {"multi_match": {"query": query, "fields": ["full_name"]}},
-            "size": page_size,
-            "from": from_value,
-        }
-        resp = await self.elastic.search(index="persons", body=query_body)
-        persons = [
-            Person(**person_doc["_source"]) for person_doc in resp["hits"]["hits"]
-        ]
-
-        for person in persons:
-            person_films = await self.get_persons_films(person.full_name)
-            person.film_ids = person_films
-
-            is_director = await self.get_persons_roles(person.full_name, "director")
-            is_actor = await self.get_persons_roles(person.full_name, "actors_names")
-            is_writer = await self.get_persons_roles(person.full_name, "writers_names")
-
-            roles = []
-            if is_director:
-                roles.append("Director")
-            if is_actor:
-                roles.append("Actor")
-            if is_writer:
-                roles.append("Writer")
-            person.role = roles
-
-        return persons
-
-    async def get_by_id(self, person_id: str) -> Person | None:
-        person = await self._get_person_from_elastic(person_id)
-
-        person.film_ids = await self.get_persons_films(person.full_name)
-
-        is_director = await self.get_persons_roles(person.full_name, "director")
-        is_actor = await self.get_persons_roles(person.full_name, "actors_names")
-        is_writer = await self.get_persons_roles(person.full_name, "writers_names")
-
-        roles = []
-        if is_director:
-            roles.append("Director")
-        if is_actor:
-            roles.append("Actor")
-        if is_writer:
-            roles.append("Writer")
-        person.role = roles
-
-        return person
-
-    async def _get_person_from_elastic(self, person_id: str) -> Person | None:
-        try:
-            doc = await self.elastic.get(index="persons", id=person_id)
-        except NotFoundError:
-            return None
-        return Person(**doc["_source"])
+from api.v1.schemas import Person
+from cache import cached
+from models.elastic.person import Person as ElasticPerson
+from models.elastic.person import Role as ElasticRole
+from repositories.elastic import ElastisearchRepository, get_person_repository
+from services.person.person_list_query_body import (person_list_query_body,
+                                                    person_search_query_body)
 
 
-@lru_cache()
-def get_person_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> PersonService:
-    return PersonService(redis, elastic)
+def _reduce_person_role(roles_acc: dict[str, set[Any]], role: ElasticRole) -> dict:
+    roles_acc['film_ids'].add(role.film_id)
+    roles_acc['role'].add(role.role)
+    return roles_acc
+
+
+def _map_person(person: ElasticPerson) -> Person:
+    roles = functools.reduce(
+        _reduce_person_role,
+        person.roles,
+        {'film_ids': set(), 'role': set()},
+    )
+    return Person(
+        uuid=person.id,
+        full_name=person.full_name,
+        film_ids=list(roles['film_ids']),
+        role=list(roles['role']),
+    )
+
+
+async def _person_list_by_query(
+    query_body: dict,
+    person_repo: ElastisearchRepository[ElasticPerson],
+) -> list[Person]:
+    persons = await person_repo.list(query_body=query_body)
+    return [_map_person(person) for person in persons]
+
+
+async def get_person_list(
+    query_body: dict = Depends(person_list_query_body),
+    person_repo: ElastisearchRepository[ElasticPerson] = Depends(get_person_repository),
+) -> list[Person]:
+    return await _person_list_by_query(
+        query_body=query_body,
+        person_repo=person_repo,
+    )
+
+
+async def search_person(
+    query_body: dict = Depends(person_search_query_body),
+    person_repo: ElastisearchRepository[ElasticPerson] = Depends(get_person_repository),
+) -> list[Person]:
+    return await _person_list_by_query(
+        query_body=query_body,
+        person_repo=person_repo,
+    )
+
+
+@cached.cached_id_item(id_name='person_id')
+async def get_person_by_id(
+    person_id: uuid_m.UUID = Path(
+        ...,
+        title="Идентификатор",
+        description="Идентификатор под которым фильм хранится в БД",
+    ),
+    person_repo: ElastisearchRepository[ElasticPerson] = Depends(get_person_repository),
+) -> Person | None:
+    person = await person_repo.get_by_id(person_id)
+    if not person:
+        return None
+    return _map_person(person)

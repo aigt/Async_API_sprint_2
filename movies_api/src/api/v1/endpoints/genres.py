@@ -18,7 +18,7 @@ settings = get_settings()
     summary="Получить жанр",
 )
 async def get_genre_by_id(
-    genre: Genre = Depends(service.get_genre_by_id),
+    genre: Genre | None = Depends(service.get_genre_by_id),
 ) -> Genre:
     """
     Получить жанр с полной информацией:

@@ -1,11 +1,12 @@
 import uuid as uuid_m
 
-from fastapi import Depends, Query
+from fastapi import Depends, Path
 
 from api.v1.schemas import Film
-from services.film.film_list_query_body import (film_list_query_body,
-                                               film_search_query_body)
+from cache import cached
 from repositories.elastic import ElastisearchRepository, get_film_repository
+from services.film.film_list_query_body import (film_list_query_body,
+                                                film_search_query_body)
 
 
 async def _film_list_by_query(
@@ -48,8 +49,9 @@ async def search_films(
     )
 
 
+@cached.cached_id_item(id_name='film_id')
 async def get_film_by_id(
-    film_id: uuid_m.UUID = Query(
+    film_id: uuid_m.UUID = Path(
         ...,
         title="Идентификатор",
         description="Идентификатор под которым фильм хранится в БД",

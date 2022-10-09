@@ -1,7 +1,7 @@
 from http import HTTPStatus
 import uuid as uuid_m
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
 
 from api.v1.schemas import Genre
 from cache import cached
@@ -21,7 +21,7 @@ settings = get_settings()
 )
 @cached.cached_id_item(id_name='genre_id')
 async def genre_details(
-    genre_id: uuid_m.UUID = Query(
+    genre_id: uuid_m.UUID = Path(
         ...,
         title="Идентификатор",
         description="Идентификатор под которым жанр хранится в БД",

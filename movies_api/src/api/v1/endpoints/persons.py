@@ -1,7 +1,7 @@
 from http import HTTPStatus
 import uuid as uuid_m
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
 
 from api.v1.schemas import Person
 from cache import cached
@@ -63,7 +63,7 @@ async def persons_search(
 )
 @cached.cached_id_item(id_name='person_id')
 async def person_details(
-    person_id: uuid_m.UUID = Query(
+    person_id: uuid_m.UUID = Path(
         ...,
         title="Идентификатор",
         description="Идентификатор под которым персона хранится в БД",

@@ -43,7 +43,6 @@ async def search_films(
     response_model=Film,
     summary="Получить фильм",
 )
-@cached.cached_id_item(id_name='film_id')
 async def get_film_by_id(
     film: Film = Depends(service.get_film_by_id),
 ) -> Film:

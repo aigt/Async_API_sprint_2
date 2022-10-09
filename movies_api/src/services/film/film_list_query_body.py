@@ -60,4 +60,3 @@ async def film_search_query_body(
     list_config: FilmListQueryConfig = Depends(film_search_query_config)
 ) -> dict:
     return await _build_film_list_es_query_body(list_config)
-    

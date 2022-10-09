@@ -3,7 +3,6 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.schemas import Film
-from cache import cached
 from core import text_messages
 from services import film as service
 

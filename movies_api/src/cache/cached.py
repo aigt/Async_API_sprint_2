@@ -37,7 +37,7 @@ def cached_id_item(*, id_name: str):
                 )
 
             logging.debug(f'data with key {key}: {data}')
-            v_type = func.__annotations__['return']
+            v_type = func.__annotations__['return'].__args__[0]
             return v_type.parse_raw(data)
 
         return inner

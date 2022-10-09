@@ -34,17 +34,17 @@ class ElastisearchRepository(Generic[TItem]):
 @lru_cache()
 def get_film_repository(
     elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> ElastisearchRepository:
+) -> ElastisearchRepository[Film]:
     return ElastisearchRepository[Film](elastic=elastic, index='movies')
 
 @lru_cache()
 def get_genre_repository(
     elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> ElastisearchRepository:
+) -> ElastisearchRepository[Genre]:
     return ElastisearchRepository[Genre](elastic=elastic, index='genres')
 
 @lru_cache()
 def get_person_repository(
     elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> ElastisearchRepository:
-    return ElastisearchRepository[Person](elastic=elastic, index='persons')
+) -> ElastisearchRepository[Person]:
+    return ElastisearchRepository[Person](elastic=elastic, index='persons_v2')

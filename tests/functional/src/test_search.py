@@ -21,7 +21,7 @@ async def test_films(es_write_data, make_get_request):
                                    index=test_settings.es_index,
                                    id_field=test_settings.es_id_field)
 
-    await es_write_data(bulk_query=bulk_query)
+    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index)
     url = test_settings.service_url + '/api/v1/films'
 
     # проверка успешного вывода всех фильмов
@@ -69,7 +69,7 @@ async def test_films_search(es_write_data, make_get_request):
                                    index=test_settings.es_index,
                                    id_field=test_settings.es_id_field)
 
-    await es_write_data(bulk_query=bulk_query)
+    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index)
 
     url = test_settings.service_url + '/api/v1/films/search'
     # проверка успешного поиска с параметром query

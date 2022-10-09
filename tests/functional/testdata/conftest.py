@@ -35,8 +35,12 @@ async def aiohttp_session():
 
 @pytest.fixture()
 def es_write_data(es_client):
-    async def inner(bulk_query: list[dict]):
+    async def inner(bulk_query: list[dict], index):
         str_query = '\n'.join(bulk_query) + '\n'
+        index_exists = await es_client.indices.exists(index=index)
+        index_delete = await es_client.options(ignore_status=[400, 404]).indices.delete(index=index)
+        if index_exists:
+            index_delete
         response = await es_client.bulk(operations=str_query, refresh=True)
         if response['errors']:
             raise Exception('Ошибка записи данных в Elasticsearch')

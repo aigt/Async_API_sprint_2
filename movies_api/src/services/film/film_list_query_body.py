@@ -1,17 +1,14 @@
-import logging
-from functools import lru_cache
-
-from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.elastic.film import Film
+from core.config import get_settings
 from models.es_query_configs.film_list_query_config import FilmListQueryConfig
+from services.film.film_list_query_config import (film_list_query_config,
+                                                  film_search_query_config)
+
+settings = get_settings()
 
 
-async def film_list_es_query(query_config: FilmListQueryConfig):
+async def _build_film_list_es_query_body(query_config: FilmListQueryConfig) -> dict:
     # Пагинация
     body = {
         'size': query_config.page.size,
@@ -53,35 +50,13 @@ async def film_list_es_query(query_config: FilmListQueryConfig):
     return body
 
 
-class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
+async def film_list_query_body(
+    list_config: FilmListQueryConfig = Depends(film_list_query_config)
+) -> dict:
+    return await _build_film_list_es_query_body(list_config)
+    
 
-    async def list(
-        self,
-        query_config: FilmListQueryConfig,
-    ) -> list[Film]:
-        body = await film_list_es_query(query_config)
-        resp = await self.elastic.search(index="movies", body=body)
-
-        films = [Film(**film_doc['_source']) for film_doc in resp['hits']['hits']]
-        return films
-
-    async def get_by_id(self, film_id: str) -> Film | None:
-        return await self._get_film_from_elastic(film_id)
-
-    async def _get_film_from_elastic(self, film_id: str) -> Film | None:
-        try:
-            doc = await self.elastic.get(index='movies', id=film_id)
-        except NotFoundError:
-            return None
-        return Film(**doc['_source'])
-
-
-@lru_cache()
-def get_film_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> FilmService:
-    return FilmService(redis, elastic)
+async def film_search_query_body(
+    list_config: FilmListQueryConfig = Depends(film_search_query_config)
+) -> dict:
+    return await _build_film_list_es_query_body(list_config)

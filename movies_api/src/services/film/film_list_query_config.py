@@ -2,11 +2,7 @@ from fastapi import Depends, Query
 
 from core.config import get_settings
 from models.es_query_configs.film_list_query_config import (
-    BoolConfig,
-    FilmListQueryConfig,
-    FilterConfig,
-    SortConfig,
-)
+    BoolConfig, FilmListQueryConfig, FilterConfig, SortConfig)
 
 settings = get_settings()
 
@@ -24,6 +20,7 @@ async def film_list_query_config(
         alias="page[number]",
         title="Номер страницы",
         description="Номер страницы, которую загрузить",
+        ge=1,
     ),
     sort: str
     | None = Query(
@@ -72,7 +69,7 @@ async def film_list_query_config(
     return query_config
 
 
-def film_search_query_config(
+async def film_search_query_config(
     query: str = Query(
         ...,
         title="Запрос",

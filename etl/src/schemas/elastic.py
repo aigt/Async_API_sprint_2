@@ -66,7 +66,7 @@ ELASTIC_MAPPINGS_ALL_GENRES = {
     "dynamic": "strict",
     "properties": {
         "id": {"type": "keyword"},
-        "name": {"type": "text"},
+        "name": {"type": "text", "analyzer": "ru_en"},
     },
 }
 
@@ -74,15 +74,25 @@ ELASTIC_MAPPINGS_ALL_PERSONS = {
     "dynamic": "strict",
     "properties": {
         "id": {"type": "keyword"},
-        "full_name": {"type": "text"},
+        "full_name": {"type": "text", "analyzer": "ru_en"},
+        "roles": {
+            "type": "nested",
+            "dynamic": "strict",
+            "properties": {
+                "role": {"type": "text", "analyzer": "ru_en"},
+                "film_id": {"type": "keyword"},
+                "film_title": {"type": "text", "analyzer": "ru_en"},
+                "film_imdb_rating": {"type": "float"},
+            },
+        },
     },
 }
 
 ALL_MAPPINGS = {
     "movies": ELASTIC_MAPPINGS,
     "genres": ELASTIC_MAPPINGS_ALL_GENRES,
-    "persons": ELASTIC_MAPPINGS_ALL_PERSONS,
+    "persons_v2": ELASTIC_MAPPINGS_ALL_PERSONS,
 }
 
 
-ELASTIC_INDEX = {"movies": "movies", "genres": "genres", "persons": "persons"}
+ELASTIC_INDEX = {"movies": "movies", "genres": "genres", "persons_v2": "persons_v2"}

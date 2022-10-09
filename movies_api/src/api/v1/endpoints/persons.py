@@ -1,12 +1,10 @@
 from http import HTTPStatus
-import uuid as uuid_m
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.schemas import Person
-from cache import cached
 from core import text_messages
-from services.person import PersonService, get_person_service
+from services import person as service
 
 router = APIRouter()
 
@@ -17,17 +15,7 @@ router = APIRouter()
     summary="Найти персоны по запросу",
 )
 async def persons_search(
-    query: str,
-    page_size: int = Query(
-        default=20,
-        alias="page[size]",
-    ),
-    page_number: int
-    | None = Query(
-        default=1,
-        alias="page[number]",
-    ),
-    person_service: PersonService = Depends(get_person_service),
+    person_list: list[Person] = Depends(service.search_person),
 ) -> list[Person]:
     """
     Найти персону по запросу с полной информацией:
@@ -37,23 +25,12 @@ async def persons_search(
     - **film_ids**: imdb рейтинг фильма
     - **role**: жанры фильма
     """
-
-    persons = await person_service.search_person(query, page_number, page_size)
-
-    if not persons:
+    if not person_list:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=text_messages.PERSONS_NOT_FOUND,
         )
-    return [
-        Person(
-            uuid=person.id,
-            full_name=person.full_name,
-            film_ids=person.film_ids,
-            role=person.role,
-        )
-        for person in persons
-    ]
+    return person_list
 
 
 @router.get(
@@ -61,14 +38,8 @@ async def persons_search(
     response_model=Person,
     summary="Получить персону",
 )
-@cached.cached_id_item(id_name='person_id')
 async def person_details(
-    person_id: uuid_m.UUID = Query(
-        ...,
-        title="Идентификатор",
-        description="Идентификатор под которым персона хранится в БД",
-    ),
-    person_service: PersonService = Depends(get_person_service),
+    person: Person | None = Depends(service.get_person_by_id),
 ) -> Person:
     """
     Получить персону с полной информацией:
@@ -78,17 +49,12 @@ async def person_details(
     - **film_ids**: imdb рейтинг фильма
     - **role**: жанры фильма
     """
-    person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=text_messages.PERSON_NOT_FOUND
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=text_messages.PERSON_NOT_FOUND,
         )
-    return Person(
-        uuid=person.id,
-        full_name=person.full_name,
-        film_ids=person.film_ids,
-        role=person.role,
-    )
+    return person
 
 
 @router.get(
@@ -97,15 +63,7 @@ async def person_details(
     summary="Получить список персон",
 )
 async def persons_list(
-    page_size: int = Query(
-        default=20,
-        alias="page[size]",
-    ),
-    page_number: int = Query(
-        default=1,
-        alias="page[number]",
-    ),
-    person_service: PersonService = Depends(get_person_service),
+    person_list: list[Person] = Depends(service.get_person_list),
 ) -> list[Person]:
     """
     Получить список персон с полной информацией:
@@ -115,20 +73,9 @@ async def persons_list(
     - **film_ids**: imdb рейтинг фильма
     - **role**: жанры фильма
     """
-
-    persons = await person_service.list(page_size, page_number)
-
-    if not persons:
+    if not person_list:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=text_messages.PERSONS_NOT_FOUND,
         )
-    return [
-        Person(
-            uuid=person.id,
-            full_name=person.full_name,
-            film_ids=person.film_ids,
-            role=person.role,
-        )
-        for person in persons
-    ]
+    return person_list

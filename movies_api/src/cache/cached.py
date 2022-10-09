@@ -25,20 +25,23 @@ def cached_id_item(*, id_name: str):
             if not data:
                 logging.debug(f'no data in cache with key: {key}')
 
-                data = (await func(*args, **kwargs)).json()
+                data = await func(*args, **kwargs)
+                
                 if data is None:
                     logging.debug(f'no data in func: {func.__name__}')
                     return None
 
+                logging.debug(f'save in cache: {key}::{data}')
                 await redis.set(
                     key,
-                    data,
+                    data.json(),
                     ex=settings.CACHE_EXPIRE_IN_SECONDS,
                 )
+                return data
 
             logging.debug(f'data with key {key}: {data}')
-            v_type = func.__annotations__['return'].__args__[0]
-            return v_type.parse_raw(data)
+            return_type = func.__annotations__['return'].__args__[0]
+            return return_type.parse_raw(data)
 
         return inner
 

@@ -62,7 +62,7 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = await aioredis.Redis.from_url(settings.redis_dsn)
+    redis.redis = await aioredis.from_url(settings.redis_dsn)
     elastic.es = AsyncElasticsearch(
         hosts=[f'http://{settings.elastic_host}:{settings.elastic_port}']
     )
@@ -71,8 +71,8 @@ async def startup():
 @app.on_event('shutdown')
 async def shutdown():
     redis.redis.close()
-    await redis.redis.wait_closed()
     await elastic.es.close()
+    await redis.redis.wait_closed()
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

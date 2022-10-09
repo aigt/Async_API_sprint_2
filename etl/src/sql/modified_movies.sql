@@ -53,14 +53,12 @@ ON          pfw.film_work_id = fw.id
 
 LEFT JOIN   content.person p
 ON          p.id = pfw.person_id
-AND         p.modified > %(modified_from)s
 
 LEFT JOIN   content.genre_film_work gfw
 ON          gfw.film_work_id = fw.id
 
 LEFT JOIN   content.genre g
 ON          g.id = gfw.genre_id
-AND         g.modified > %(modified_from)s
 
 
 WHERE   fw.modified > %(modified_from)s

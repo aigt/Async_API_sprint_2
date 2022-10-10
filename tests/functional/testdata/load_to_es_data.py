@@ -119,7 +119,7 @@ es_persons = [
     },
     {
         "id": "a1758395-9578-41af-88b8-3f9456e6d938",
-        "full_name": "J.J. Abrams",
+        "full_name": "Mark Zuckerberg",
         "roles": [{
             "role": "actor",
             "film_id": "075587eb-91c1-4629-adcb-67c516cdb6eb",

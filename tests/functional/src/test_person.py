@@ -78,3 +78,37 @@ async def test_persons(es_write_data, make_get_request):
     status = response.status
     assert status == 422
 
+
+@pytest.mark.asyncio
+async def test_persons_films(es_write_data, make_get_request):
+    bulk_query = get_es_bulk_query(data=es_persons,
+                                   index=test_settings.es_index['persons'],
+                                   id_field="id")
+
+    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index['persons'])
+    url = test_settings.service_url + '/api/v1/persons/'
+
+    # проверка вывода фильмов персоны
+    url_id = url + es_persons[1]['id'] + '/film'
+    response = await make_get_request(url=url_id, query_data=None)
+    body = await response.json()
+    status = response.status
+    assert status == 200
+    assert len(body) == len(es_persons[1]['roles'])
+    assert body[0]['uuid'] == es_persons[1]['roles'][0]['film_id']
+
+    # проверка ограниничения количества фильмов персоны на страницу
+    query_data = {'page[size]': 1}
+    response = await make_get_request(url=url_id, query_data=query_data)
+    body = await response.json()
+    status = response.status
+    assert status == 200
+    assert len(body) == 1
+
+    # проверка вывода фильмов персон на второй странице
+    query_data = {'page[size]': 1, 'page[number]': 2}
+    response = await make_get_request(url=url_id, query_data=query_data)
+    body = await response.json()
+    status = response.status
+    assert status == 200
+    assert body[0]['uuid'] == es_persons[1]['roles'][1]['film_id']

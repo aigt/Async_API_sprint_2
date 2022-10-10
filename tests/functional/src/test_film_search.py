@@ -38,3 +38,19 @@ async def test_films_search(es_write_data, make_get_request):
     status_empty = response_empty.status
     assert status_empty == 422
     assert len(body_empty) == 1
+
+    # проверка вывода количества записей на страницу
+    query_data = {'query': 'The Star', 'page[size]': 1}
+    response = await make_get_request(url=url, query_data=query_data)
+    body = await response.json()
+    status = response.status
+    assert status == 200
+    assert len(body) == 1
+
+    # проверка вывода второй страницы
+    query_data = {'query': 'The Star', 'page[size]': 1, 'page[number]': 2}
+    response = await make_get_request(url=url, query_data=query_data)
+    body = await response.json()
+    status = response.status
+    assert status == 200
+    assert body[0]['title'] == 'The Star 1'

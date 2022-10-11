@@ -18,12 +18,31 @@ settings = get_settings()
 
 
 def _reduce_person_role(roles_acc: dict[str, set[Any]], role: ElasticRole) -> dict:
+    """
+    Функция для приведения ролей из индекса к словарю с нужными списками полей.
+    Полученный словарь полей применяется для маппинга схемы индекса ES к схеме API.
+
+    Args:
+        roles_acc (dict[str, set[Any]]): словарь в который собираются поля из индекса
+        role (ElasticRole): роль из которой выбрать поля
+
+    Returns:
+        dict: словарь в который собираются поля из индекса с новыми выбранными полями
+    """
     roles_acc['film_ids'].add(role.film_id)
     roles_acc['role'].add(role.role)
     return roles_acc
 
 
 def _map_person(person: ElasticPerson) -> Person:
+    """Маппинг схемы персон индекса ES к схеме API.
+
+    Args:
+        person (ElasticPerson): персона из индекса ES
+
+    Returns:
+        Person: персона индекса API
+    """
     roles = functools.reduce(
         _reduce_person_role,
         person.roles,

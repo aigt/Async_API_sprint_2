@@ -1,7 +1,9 @@
 from functools import lru_cache
 from typing import Generic, TypeVar
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
+import backoff
+from elasticsearch import (AsyncElasticsearch, ConnectionError,
+                           ConnectionTimeout, NotFoundError)
 from fastapi import Depends
 
 from db.elastic import get_elastic
@@ -15,7 +17,10 @@ class ElastisearchRepository(Generic[TItem]):
     def __init__(self, elastic: AsyncElasticsearch, index: str) -> None:
         self._elastic = elastic
         self._index = index
-        
+    
+    @backoff.on_exception(backoff.expo,
+                          (ConnectionError, ConnectionTimeout),
+                          max_time=20)
     async def get_by_id(self, id: str) -> TItem:
         try:
             doc = await self._elastic.get(index=self._index, id=id)
@@ -24,6 +29,9 @@ class ElastisearchRepository(Generic[TItem]):
         TItem_type = self.__orig_class__.__args__[0]
         return TItem_type(**doc['_source'])
     
+    @backoff.on_exception(backoff.expo,
+                          (ConnectionError, ConnectionTimeout),
+                          max_time=20)
     async def list(self, query_body: dict) -> list[TItem]:
         resp = await self._elastic.search(index=self._index, body=query_body)
         TItem_type = self.__orig_class__.__args__[0]

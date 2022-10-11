@@ -52,6 +52,6 @@ ES_INDEXES = {
     'films': 'movies',
     'films_search': 'movies',
     'genres': 'genres',
-    'persons': 'persons',
-    'persons_search': 'persons'
+    'persons': 'persons_v2',
+    'persons_search': 'persons_v2'
 }

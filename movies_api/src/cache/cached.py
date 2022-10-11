@@ -1,6 +1,9 @@
 import logging
 from functools import wraps
 
+import backoff
+from aioredis import RedisError
+
 from core.config import get_settings
 from db.redis import get_redis
 
@@ -17,11 +20,19 @@ def cached_id_item(*, id_name: str):
     def func_wrapper(func):
         @wraps(func)
         async def inner(*args, **kwargs):
+            @backoff.on_exception(backoff.expo, RedisError, max_time=20)
+            async def set_cache(key: str, data: str) -> None:
+                await redis.set(key, data, ex=settings.CACHE_EXPIRE_IN_SECONDS)
+            
+            @backoff.on_exception(backoff.expo, RedisError, max_time=20)
+            async def get_cache(key: str) -> str:
+                return await redis.get(key)
+            
             redis = await get_redis()
 
             key = f'{func.__name__}:{id_name}:{kwargs[id_name]}'
 
-            data = await redis.get(key)
+            data = await get_cache(key)
             if not data:
                 logging.debug(f'no data in cache with key: {key}')
 
@@ -32,11 +43,7 @@ def cached_id_item(*, id_name: str):
                     return None
 
                 logging.debug(f'save in cache: {key}::{data}')
-                await redis.set(
-                    key,
-                    data.json(),
-                    ex=settings.CACHE_EXPIRE_IN_SECONDS,
-                )
+                await set_cache(key, data.json())
                 return data
 
             logging.debug(f'data with key {key}: {data}')

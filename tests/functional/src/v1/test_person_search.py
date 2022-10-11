@@ -7,8 +7,13 @@ from tests.functional.testdata.conftest import get_es_bulk_query, es_client, es_
 from tests.functional.testdata.load_to_es_data import es_persons
 
 
+@pytest.mark.parametrize("query_data, expected",
+                         [({'query': 'Mark', 'page[size]': 50}, {'status': 200, 'length': 2}),
+                          ({'query': 'Unknown Person', 'page[size]': 50}, {'status': 404, 'length': 1}),
+                          (None, {'status': 422, 'length': 1}),
+                          ({'query': 'Mark', 'page[size]': 1}, {'status': 200, 'length': 1})])
 @pytest.mark.asyncio
-async def test_persons_search(es_write_data, make_get_request):
+async def test_persons_search(es_write_data, make_get_request, query_data, expected):
     bulk_query = get_es_bulk_query(data=es_persons,
                                    index=test_settings.es_index['persons_search'],
                                    id_field='full_name')
@@ -16,41 +21,26 @@ async def test_persons_search(es_write_data, make_get_request):
     await es_write_data(bulk_query=bulk_query, index=test_settings.es_index['persons_search'])
 
     url = test_settings.service_url + '/api/v1/persons/search'
-    # проверка успешного поиска с параметром query
-    query_data = {'query': 'Mark', 'page[size]': 50}
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
-    assert status == 200
-    assert len(body) == 2
+    assert status == expected['status']
+    assert len(body) == expected['length']
 
-    # проверка поиска неизвестной персоны
-    query_data = {'query': 'Unknown Person', 'page[size]': 50}
+
+@pytest.mark.parametrize("query_data, expected",
+                         [({'query': 'mark', 'page[size]': 1, 'page[number]': 2}, {'status': 200, 'full_name': 'Mark Zuckerberg'})])
+@pytest.mark.asyncio
+async def test_persons_search_title(es_write_data, make_get_request, query_data, expected):
+    bulk_query = get_es_bulk_query(data=es_persons,
+                                   index=test_settings.es_index['persons_search'],
+                                   id_field='full_name')
+
+    await es_write_data(bulk_query=bulk_query, index=test_settings.es_index['persons_search'])
+
+    url = test_settings.service_url + '/api/v1/persons/search'
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
-    assert status == 404
-    assert len(body) == 1
-
-    # проверка ошибки при пустом значении query
-    response = await make_get_request(url=url, query_data=None)
-    body = await response.json()
-    status = response.status
-    assert status == 422
-    assert len(body) == 1
-
-    # проверка вывода количества записей на страницу
-    query_data = {'query': 'Mark', 'page[size]': 1}
-    response = await make_get_request(url=url, query_data=query_data)
-    body = await response.json()
-    status = response.status
-    assert status == 200
-    assert len(body) == 1
-
-    # проверка вывода второй страницы
-    query_data = {'query': 'Mark', 'page[size]': 1, 'page[number]': 2}
-    response = await make_get_request(url=url, query_data=query_data)
-    body = await response.json()
-    status = response.status
-    assert status == 200
-    assert body[0]['full_name'] == 'Mark Zuckerberg'
+    assert status == expected['status']
+    assert body[0]['full_name'] == expected['full_name']

@@ -63,8 +63,8 @@ services:
       - discovery.type=single-node
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
+    expose:
+      - "9200"
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
       interval: 30s

@@ -16,12 +16,12 @@ class PostgresExtractor:
         self._dsn = dsn
         self._connection = None
 
-    def connected(self) -> bool | None:
+    def connected(self) -> bool:
         """Функция проверяет наличие соединения с БД"""
-        return self._connection and self._connection.closed == 0
+        return self._connection and self._connection.closed is not None
 
     def connect(self) -> None:
-        """Функция пересоздает соединение с БД"""
+        """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = psycopg2.connect(dsn=self._dsn)
 
@@ -34,7 +34,7 @@ class PostgresExtractor:
                 logging.error(e)
         self._connection = None
 
-    def get_movies_changes(self, cursor, query, state):
+    def get_movies_changes(self, cursor, query, state) -> list:
         if state.is_empty():
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:
@@ -43,7 +43,7 @@ class PostgresExtractor:
         cursor.execute(
             query,
             {
-                'batch_size': 100,
+                'batch_size': 1000,
                 'modified_from': last_modified,
             },
         )
@@ -55,7 +55,7 @@ class PostgresExtractor:
             return data
         return []
 
-    def get_all_genres_persons(self, cursor, query, state):
+    def get_all_genres_persons(self, cursor, query, state) -> list:
         if state.is_empty():
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:

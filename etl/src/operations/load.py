@@ -24,12 +24,12 @@ class ElasticLoader:
         self.mappings = mappings
         self.state = state
 
-    def connected(self) -> bool | None:
+    def connected(self) -> bool:
         """Функция проверяет наличие соединения с БД"""
         return self._connection and self._connection.ping()
 
     def connect(self):
-        """Функция пересоздает соединение с БД"""
+        """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = Elasticsearch(self._conn)
 

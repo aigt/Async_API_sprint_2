@@ -63,4 +63,4 @@ if __name__ == "__main__":
             transformer=movies_transformer,
             loader=movies_loader,
         )
-        time.sleep(10)
+        time.sleep(60 * 10)

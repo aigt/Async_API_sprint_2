@@ -3,8 +3,6 @@ from dataclasses import asdict
 from typing import Any
 
 from elasticsearch import Elasticsearch
-from tenacity import retry, wait_exponential
-
 from decorators.es_reconnect import es_reconnect
 
 
@@ -44,7 +42,6 @@ class ElasticLoader:
                 logging.error(e)
         self._connection = None
 
-    @retry(wait=wait_exponential(min=5, max=120))
     @es_reconnect
     def load(self, dataclass_data: list) -> None:
         """Функция загружает полученные данные в ElasticSearch.

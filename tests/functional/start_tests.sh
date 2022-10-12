@@ -2,6 +2,6 @@
 
 cd /opt/app/tests/functional
 
-pytest src/v1
+pytest .
 
 exec "$@"

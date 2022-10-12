@@ -20,7 +20,7 @@ def etl(
     extractor: PostgresExtractor, transformer: DataTransformer, loader: ElasticLoader
 ) -> None:
     """Функция для последовательного запуска экземпляров ETL-процесса"""
-    logging.warning("ETL process was started.")
+    logging.info("ETL process was started.")
     data = extractor.extract()
     transformed_data = transformer.transform(data)
     loader.load(transformed_data)

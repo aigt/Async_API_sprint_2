@@ -3,7 +3,6 @@ from typing import Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
-from tenacity import retry, wait_exponential
 
 from decorators.pg_reconnect import pg_reconnect
 
@@ -44,7 +43,7 @@ class PostgresExtractor:
         cursor.execute(
             query,
             {
-                'batch_size': 1000,
+                'batch_size': 100,
                 'modified_from': last_modified,
             },
         )
@@ -76,7 +75,6 @@ class PostgresExtractor:
             return data
         return data
 
-    @retry(wait=wait_exponential(min=5, max=120))
     @pg_reconnect
     def extract(self) -> list:
         """Функция подключается к БД, выполняет запрос и возвращает данные в виде списка"""

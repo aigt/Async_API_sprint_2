@@ -1,6 +1,10 @@
 FROM python:3.10
 
-WORKDIR /opt/app
+ARG TESTS_ROOT=/tests/functional
+ENV TESTS_ROOT=${TESTS_ROOT}
+ENV PYTHONPATH ${TESTS_ROOT}
+
+WORKDIR ${TESTS_ROOT}
 
 COPY requirements.txt requirements.txt
 COPY start_tests.sh start_tests.sh
@@ -8,8 +12,8 @@ COPY start_tests.sh start_tests.sh
 RUN  pip install --upgrade pip \
      && pip install -r requirements.txt
 
-COPY . /opt/app/tests/functional
+COPY . ${TESTS_ROOT}
 
-RUN chmod 777 /opt/app/start_tests.sh
+RUN chmod 777 ${TESTS_ROOT}/start_tests.sh
 
-ENTRYPOINT ["/opt/app/start_tests.sh"]
+ENTRYPOINT ${TESTS_ROOT}/start_tests.sh

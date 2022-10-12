@@ -1,6 +1,9 @@
-from pydantic import BaseSettings, Field
-from tests.functional.testdata.schemas import ES_MOVIES_MAP, ES_PERSONS_MAP, ES_GENRES_MAP, ES_INDEXES
+from functools import lru_cache
 
+from pydantic import BaseSettings, Field
+
+from testdata.schemas import (ES_GENRES_MAP, ES_INDEXES, ES_MOVIES_MAP,
+                               ES_PERSONS_MAP)
 
 
 class TestSettings(BaseSettings):
@@ -13,4 +16,6 @@ class TestSettings(BaseSettings):
     service_url: str = Field(default='http://127.0.0.1:8000', env='SERVICE_URL')
 
 
-test_settings = TestSettings()
+@lru_cache
+def get_settings():
+    return TestSettings()

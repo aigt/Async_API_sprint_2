@@ -20,7 +20,7 @@ class PostgresExtractor:
         """Функция проверяет наличие соединения с БД"""
         return self._connection and self._connection.closed is not None
 
-    def connect(self) -> None:
+    def reconnect(self) -> None:
         """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = psycopg2.connect(dsn=self._dsn)

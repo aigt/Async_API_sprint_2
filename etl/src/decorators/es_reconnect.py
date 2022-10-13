@@ -13,7 +13,7 @@ def es_reconnect(extractor: Callable, start_sleep_time=0.1, factor=2, border_sle
         n = 0
         while True:
             if not process.connected():
-                process.connect()
+                process.reconnect()
                 logging.warning("Elastic connection is UP")
             try:
                 return extractor(process, *args, **kwargs)

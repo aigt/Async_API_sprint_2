@@ -28,7 +28,7 @@ class ElasticLoader:
         """Функция проверяет наличие соединения с БД"""
         return self._connection and self._connection.ping()
 
-    def connect(self):
+    def reconnect(self):
         """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = Elasticsearch(self._conn)

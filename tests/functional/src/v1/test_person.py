@@ -1,7 +1,5 @@
 import pytest
 
-from conftest import (aiohttp_session, es_client, es_write_data,
-                      get_es_bulk_query, make_get_request, settings)
 from testdata.load_to_es_data import es_persons
 
 
@@ -10,13 +8,8 @@ from testdata.load_to_es_data import es_persons
                           ({'page[size]': 1}, {"status": 200, "length": 1})])
 @pytest.mark.asyncio
 async def test_persons(settings, es_write_data, make_get_request, query_data, expected):
-    bulk_query = get_es_bulk_query(data=es_persons,
-                                   index=settings.es_index['persons'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['persons'])
+    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
-
     # проверка успешного вывода всех фильмов
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
@@ -26,17 +19,12 @@ async def test_persons(settings, es_write_data, make_get_request, query_data, ex
 
 
 @pytest.mark.parametrize("query_data, expected",
-                         [({'page[size]': 1, 'page[number]': 2}, {"status": 200, "full_name": 'Mark Hamill'})])
-
+                         [({'page[size]': 1, 'page[number]': 2},
+                           {"status": 200, "full_name": 'Mark Hamill'})])
 @pytest.mark.asyncio
 async def test_persons_full_name(settings, es_write_data, make_get_request, query_data, expected):
-    bulk_query = get_es_bulk_query(data=es_persons,
-                                   index=settings.es_index['persons'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['persons'])
+    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
-
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
@@ -51,11 +39,7 @@ async def test_persons_full_name(settings, es_write_data, make_get_request, quer
                                                  'role': ['actor']})])
 @pytest.mark.asyncio
 async def test_persons_id(settings, es_write_data, make_get_request, person_id, expected):
-    bulk_query = get_es_bulk_query(data=es_persons,
-                                   index=settings.es_index['persons'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['persons'])
+    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
@@ -71,11 +55,7 @@ async def test_persons_id(settings, es_write_data, make_get_request, person_id, 
                           ('some invalid id', {'status': 422})])
 @pytest.mark.asyncio
 async def test_persons_invalid_id(settings, es_write_data, make_get_request, person_id, expected):
-    bulk_query = get_es_bulk_query(data=es_persons,
-                                   index=settings.es_index['persons'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['persons'])
+    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
@@ -87,13 +67,8 @@ async def test_persons_invalid_id(settings, es_write_data, make_get_request, per
                          [(es_persons[1]['id'], {"status": 200, "movie_count": 36})])
 @pytest.mark.asyncio
 async def test_persons_films(settings, es_write_data, make_get_request, person_id, expected):
-    bulk_query = get_es_bulk_query(data=es_persons,
-                                   index=settings.es_index['persons'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['persons'])
+    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id + '/film'
-
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status

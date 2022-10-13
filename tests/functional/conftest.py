@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import aiohttp
 import pytest
@@ -7,26 +6,20 @@ import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
 
 from settings import get_settings
+from utils.es_bulk_query import get_es_bulk_query
 
 
 @pytest.fixture(scope="session")
 def event_loop():
-    return asyncio.get_event_loop()
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="session")
 def settings():
     return get_settings()
-
-
-def get_es_bulk_query(data, index, id_field):
-    bulk_query = []
-    for row in data:
-        bulk_query.extend([
-            json.dumps({'index': {'_index': index, '_id': row[id_field]}}),
-            json.dumps(row)
-        ])
-    return bulk_query
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -46,7 +39,8 @@ async def aiohttp_session():
 
 @pytest.fixture()
 def es_write_data(es_client):
-    async def inner(bulk_query: list[dict], index):
+    async def inner(index, id_field, data):
+        bulk_query = get_es_bulk_query(data=data, index=index, id_field=id_field)
         str_query = '\n'.join(bulk_query) + '\n'
         index_exists = await es_client.indices.exists(index=index)
         index_delete = await es_client.options(ignore_status=[400, 404]).indices.delete(index=index)

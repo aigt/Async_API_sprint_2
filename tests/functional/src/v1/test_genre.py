@@ -1,7 +1,5 @@
 import pytest
 
-from conftest import (aiohttp_session, es_client, es_write_data,
-                      get_es_bulk_query, make_get_request, settings)
 from testdata.load_to_es_data import es_genres
 
 
@@ -10,13 +8,8 @@ from testdata.load_to_es_data import es_genres
                           ({'page[size]': 1}, {"status": 200, "length": 1})])
 @pytest.mark.asyncio
 async def test_genres(settings, es_write_data, make_get_request, query_data, expected):
-    bulk_query = get_es_bulk_query(data=es_genres,
-                                   index=settings.es_index['genres'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['genres'])
+    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/'
-
     # проверка успешного вывода всех фильмов
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
@@ -26,17 +19,12 @@ async def test_genres(settings, es_write_data, make_get_request, query_data, exp
 
 
 @pytest.mark.parametrize("query_data, expected",
-                         [({'page[size]': 1, 'page[number]': 2}, {"status": 200, "name": 'Drama'})])
-
+                         [({'page[size]': 1, 'page[number]': 2},
+                           {"status": 200, "name": 'Drama'})])
 @pytest.mark.asyncio
 async def test_genres_name(settings, es_write_data, make_get_request, query_data, expected):
-    bulk_query = get_es_bulk_query(data=es_genres,
-                                   index=settings.es_index['genres'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['genres'])
+    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/'
-
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
@@ -48,11 +36,7 @@ async def test_genres_name(settings, es_write_data, make_get_request, query_data
                          [(es_genres[0]['id'], {'status': 200, 'name': 'Sci-Fi'})])
 @pytest.mark.asyncio
 async def test_genres_id(settings, es_write_data, make_get_request, genre_id, expected):
-    bulk_query = get_es_bulk_query(data=es_genres,
-                                   index=settings.es_index['genres'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['genres'])
+    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/' + genre_id
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
@@ -66,11 +50,7 @@ async def test_genres_id(settings, es_write_data, make_get_request, genre_id, ex
                           ('some invalid id', {'status': 422})])
 @pytest.mark.asyncio
 async def test_films_invalid_id(settings, es_write_data, make_get_request, genre_id, expected):
-    bulk_query = get_es_bulk_query(data=es_genres,
-                                   index=settings.es_index['genres'],
-                                   id_field='id')
-
-    await es_write_data(bulk_query=bulk_query, index=settings.es_index['genres'])
+    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/' + genre_id
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()

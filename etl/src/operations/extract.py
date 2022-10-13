@@ -3,7 +3,6 @@ from typing import Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
-from tenacity import retry, wait_exponential
 
 from decorators.pg_reconnect import pg_reconnect
 
@@ -17,12 +16,12 @@ class PostgresExtractor:
         self._dsn = dsn
         self._connection = None
 
-    def connected(self) -> bool | None:
+    def connected(self) -> bool:
         """Функция проверяет наличие соединения с БД"""
-        return self._connection and self._connection.closed == 0
+        return self._connection and self._connection.closed is not None
 
-    def connect(self) -> None:
-        """Функция пересоздает соединение с БД"""
+    def reconnect(self) -> None:
+        """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = psycopg2.connect(dsn=self._dsn)
 
@@ -35,7 +34,7 @@ class PostgresExtractor:
                 logging.error(e)
         self._connection = None
 
-    def get_movies_changes(self, cursor, query, state):
+    def get_movies_changes(self, cursor, query, state) -> list:
         if state.is_empty():
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:
@@ -56,7 +55,7 @@ class PostgresExtractor:
             return data
         return []
 
-    def get_all_genres_persons(self, cursor, query, state):
+    def get_all_genres_persons(self, cursor, query, state) -> list:
         if state.is_empty():
             last_modified = "1000-01-01 00:00:00.222397+00"
         else:
@@ -76,7 +75,6 @@ class PostgresExtractor:
             return data
         return data
 
-    @retry(wait=wait_exponential(min=5, max=120))
     @pg_reconnect
     def extract(self) -> list:
         """Функция подключается к БД, выполняет запрос и возвращает данные в виде списка"""

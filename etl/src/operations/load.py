@@ -3,8 +3,6 @@ from dataclasses import asdict
 from typing import Any
 
 from elasticsearch import Elasticsearch
-from tenacity import retry, wait_exponential
-
 from decorators.es_reconnect import es_reconnect
 
 
@@ -26,12 +24,12 @@ class ElasticLoader:
         self.mappings = mappings
         self.state = state
 
-    def connected(self) -> bool | None:
+    def connected(self) -> bool:
         """Функция проверяет наличие соединения с БД"""
         return self._connection and self._connection.ping()
 
-    def connect(self):
-        """Функция пересоздает соединение с БД"""
+    def reconnect(self):
+        """Функция закрывает соединение с БД и создает новое"""
         self.close()
         self._connection = Elasticsearch(self._conn)
 
@@ -44,7 +42,6 @@ class ElasticLoader:
                 logging.error(e)
         self._connection = None
 
-    @retry(wait=wait_exponential(min=5, max=120))
     @es_reconnect
     def load(self, dataclass_data: list) -> None:
         """Функция загружает полученные данные в ElasticSearch.

@@ -23,7 +23,6 @@ class JsonFileStorage(BaseStorage):
 
     def save_state(self, state: dict) -> None:
         """Функция сохраняет состояние на диск в формате json"""
-        # with open(self.file_path, "w") as json_data:
         with open(self.file_path, "w+") as json_data:
             json.dump(state, json_data, default=str)
 

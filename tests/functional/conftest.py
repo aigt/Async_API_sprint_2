@@ -1,6 +1,7 @@
 import asyncio
 
 import aiohttp
+import aioredis
 import pytest
 import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
@@ -115,3 +116,15 @@ def make_get_request(aiohttp_session):
         response = await aiohttp_session.get(url, params=query_data)
         return response
     return inner
+
+
+@pytest_asyncio.fixture(scope='session')
+async def redis_client(settings):
+    redis = await aioredis.from_url(
+        settings.redis_dsn,
+        encoding="utf-8",
+        decode_responses=True,
+    )
+    yield redis
+    await redis.close()
+    await redis.connection_pool.disconnect()

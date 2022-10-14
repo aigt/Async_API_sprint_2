@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 
@@ -14,11 +16,13 @@ import pytest
 async def test_persons_search(
     settings,
     prepare_person_search_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/search'
     
     # Act
@@ -41,11 +45,13 @@ async def test_persons_search(
 async def test_persons_search_title(
     settings,
     prepare_person_search_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/search'
     
     # Act

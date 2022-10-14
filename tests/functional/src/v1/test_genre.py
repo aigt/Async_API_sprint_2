@@ -14,11 +14,13 @@ from testdata.load_to_es_data import es_genres
 async def test_genres(
     settings,
     prepare_genre_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/genres/'
     
     # Act
@@ -41,11 +43,13 @@ async def test_genres(
 async def test_genres_name(
     settings,
     prepare_genre_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/genres/'
     
     # Act
@@ -68,11 +72,13 @@ async def test_genres_name(
 async def test_genres_id(
     settings,
     prepare_genre_es_data,
+    redis_client,
     make_get_request,
     genre_id,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/genres/' + genre_id
     
     # Act
@@ -96,11 +102,13 @@ async def test_genres_id(
 async def test_films_invalid_id(
     settings,
     prepare_genre_es_data,
+    redis_client,
     make_get_request,
     genre_id,
     expected
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/genres/' + genre_id
     
     # Act

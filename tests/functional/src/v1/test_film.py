@@ -14,11 +14,13 @@ from testdata.load_to_es_data import es_films
 async def test_films(
     settings,
     prepare_film_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/films/'
     
     # Act
@@ -43,11 +45,13 @@ async def test_films(
 async def test_films_title(
     settings,
     prepare_film_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/films/'
     
     # Act
@@ -70,11 +74,13 @@ async def test_films_title(
 async def test_films_id(
     settings,
     prepare_film_es_data,
+    redis_client,
     make_get_request,
     film_id,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/films/' + film_id
     
     # Act
@@ -98,11 +104,13 @@ async def test_films_id(
 async def test_films_invalid_id(
     settings,
     prepare_film_es_data,
+    redis_client,
     make_get_request,
     film_id,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/films/' + film_id
     
     # Act

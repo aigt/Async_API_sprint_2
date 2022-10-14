@@ -20,11 +20,16 @@ async def test_films_search(
     query_data,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films_search'], id_field=settings.es_id_field, data=es_films_search)
     url = settings.service_url + '/api/v1/films/search'
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert len(body) == expected['length']
 
@@ -43,10 +48,15 @@ async def test_films_search_title(
     query_data,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films_search'], id_field=settings.es_id_field, data=es_films_search)
     url = settings.service_url + '/api/v1/films/search'
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert body[0]['title'] == expected['title']

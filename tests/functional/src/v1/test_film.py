@@ -18,12 +18,16 @@ async def test_films(
     query_data,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/'
-    # проверка успешного вывода всех фильмов
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert len(body) == expected['length']
 
@@ -44,11 +48,16 @@ async def test_films_title(
     query_data,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/'
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert body[0]['title'] == expected['title']
 
@@ -67,11 +76,16 @@ async def test_films_id(
     film_id,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/' + film_id
+    
+    # Act
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert body['title'] == expected['title']
 
@@ -91,9 +105,14 @@ async def test_films_invalid_id(
     film_id,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/' + film_id
+    
+    # Act
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']

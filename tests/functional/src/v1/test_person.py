@@ -18,12 +18,16 @@ async def test_persons(
     query_data,
     expected
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
-    # проверка успешного вывода всех фильмов
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert len(body) == expected['length']
 
@@ -42,11 +46,16 @@ async def test_persons_full_name(
     query_data,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
+    
+    # Act
     response = await make_get_request(url=url, query_data=query_data)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert  body[0]['full_name'] == expected['full_name']
 
@@ -73,11 +82,16 @@ async def test_persons_id(
     person_id,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
+    
+    # Act
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert body['full_name'] == expected['full_name']
     assert len(body['film_ids']) == expected['film_ids']
@@ -99,11 +113,16 @@ async def test_persons_invalid_id(
     person_id,
     expected,
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
+    
+    # Act
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
 
 
@@ -121,10 +140,15 @@ async def test_persons_films(
     person_id,
     expected
 ):
+    # Arrange
     await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id + '/film'
+    
+    # Act
     response = await make_get_request(url=url, query_data=None)
     body = await response.json()
     status = response.status
+    
+    # Assert
     assert status == expected['status']
     assert len(body[0]['uuid']) == expected['movie_count']

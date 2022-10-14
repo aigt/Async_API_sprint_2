@@ -6,6 +6,8 @@ import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
 
 from settings import get_settings
+from testdata.load_to_es_data import (es_films, es_films_search, es_genres,
+                                      es_persons)
 from utils.es_bulk_query import get_es_bulk_query
 
 
@@ -37,7 +39,7 @@ async def aiohttp_session():
     await session.close()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def es_write_data(es_client):
     async def inner(index, id_field, data):
         bulk_query = get_es_bulk_query(data=data, index=index, id_field=id_field)
@@ -50,6 +52,61 @@ def es_write_data(es_client):
         if response['errors']:
             raise Exception('Ошибка записи данных в Elasticsearch')
     return inner
+
+
+@pytest.fixture(scope="module")
+def prepare_film_search_es_data(settings, es_write_data, event_loop):
+    event_loop.run_until_complete(
+        es_write_data(
+            index=settings.es_index['films_search'],
+            id_field=settings.es_id_field,
+            data=es_films_search,
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def prepare_film_es_data(settings, es_write_data, event_loop):
+    event_loop.run_until_complete(
+        es_write_data(
+            index=settings.es_index['films'],
+            id_field='id',
+            data=es_films,
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def prepare_genre_es_data(settings, es_write_data, event_loop):
+    event_loop.run_until_complete(
+        es_write_data(
+            index=settings.es_index['genres'],
+            id_field='id',
+            data=es_genres,
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def prepare_person_search_es_data(settings, es_write_data, event_loop):
+    event_loop.run_until_complete(
+        es_write_data(
+            index=settings.es_index['persons_search'],
+            id_field='full_name',
+            data=es_persons,
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def prepare_person_es_data(settings, es_write_data, event_loop):
+    event_loop.run_until_complete(
+        es_write_data(
+            index=settings.es_index['persons'],
+            id_field='id',
+            data=es_persons,
+        )
+    )
 
 
 @pytest.fixture()

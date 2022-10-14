@@ -13,13 +13,12 @@ from testdata.load_to_es_data import es_genres
 @pytest.mark.asyncio
 async def test_genres(
     settings,
-    es_write_data,
+    prepare_genre_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/'
     
     # Act
@@ -41,13 +40,12 @@ async def test_genres(
 @pytest.mark.asyncio
 async def test_genres_name(
     settings,
-    es_write_data,
+    prepare_genre_es_data,
     make_get_request,
     query_data,
     expected
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/'
     
     # Act
@@ -69,13 +67,12 @@ async def test_genres_name(
 @pytest.mark.asyncio
 async def test_genres_id(
     settings,
-    es_write_data,
+    prepare_genre_es_data,
     make_get_request,
     genre_id,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/' + genre_id
     
     # Act
@@ -98,13 +95,12 @@ async def test_genres_id(
 @pytest.mark.asyncio
 async def test_films_invalid_id(
     settings,
-    es_write_data,
+    prepare_genre_es_data,
     make_get_request,
     genre_id,
     expected
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['genres'], id_field='id', data=es_genres)
     url = settings.service_url + '/api/v1/genres/' + genre_id
     
     # Act

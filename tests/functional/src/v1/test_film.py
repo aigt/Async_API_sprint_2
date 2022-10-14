@@ -13,13 +13,12 @@ from testdata.load_to_es_data import es_films
 @pytest.mark.asyncio
 async def test_films(
     settings,
-    es_write_data,
+    prepare_film_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/'
     
     # Act
@@ -43,13 +42,12 @@ async def test_films(
 @pytest.mark.asyncio
 async def test_films_title(
     settings,
-    es_write_data,
+    prepare_film_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/'
     
     # Act
@@ -71,13 +69,12 @@ async def test_films_title(
 @pytest.mark.asyncio
 async def test_films_id(
     settings,
-    es_write_data,
+    prepare_film_es_data,
     make_get_request,
     film_id,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/' + film_id
     
     # Act
@@ -100,13 +97,12 @@ async def test_films_id(
 @pytest.mark.asyncio
 async def test_films_invalid_id(
     settings,
-    es_write_data,
+    prepare_film_es_data,
     make_get_request,
     film_id,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films'], id_field='id', data=es_films)
     url = settings.service_url + '/api/v1/films/' + film_id
     
     # Act

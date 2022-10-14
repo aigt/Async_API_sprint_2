@@ -1,7 +1,5 @@
 import pytest
 
-from testdata.load_to_es_data import es_films_search
-
 
 @pytest.mark.parametrize(
     "query_data, expected",
@@ -15,13 +13,12 @@ from testdata.load_to_es_data import es_films_search
 @pytest.mark.asyncio
 async def test_films_search(
     settings,
-    es_write_data,
+    prepare_film_search_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films_search'], id_field=settings.es_id_field, data=es_films_search)
     url = settings.service_url + '/api/v1/films/search'
     
     # Act
@@ -43,13 +40,12 @@ async def test_films_search(
 @pytest.mark.asyncio
 async def test_films_search_title(
     settings,
-    es_write_data,
+    prepare_film_search_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['films_search'], id_field=settings.es_id_field, data=es_films_search)
     url = settings.service_url + '/api/v1/films/search'
     
     # Act

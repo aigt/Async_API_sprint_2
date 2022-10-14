@@ -13,13 +13,12 @@ from testdata.load_to_es_data import es_persons
 @pytest.mark.asyncio
 async def test_persons(
     settings,
-    es_write_data,
+    prepare_person_es_data,
     make_get_request,
     query_data,
     expected
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
     
     # Act
@@ -41,13 +40,12 @@ async def test_persons(
 @pytest.mark.asyncio
 async def test_persons_full_name(
     settings,
-    es_write_data,
+    prepare_person_es_data,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/'
     
     # Act
@@ -77,13 +75,12 @@ async def test_persons_full_name(
 @pytest.mark.asyncio
 async def test_persons_id(
     settings,
-    es_write_data,
+    prepare_person_es_data,
     make_get_request,
     person_id,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
     
     # Act
@@ -108,13 +105,12 @@ async def test_persons_id(
 @pytest.mark.asyncio
 async def test_persons_invalid_id(
     settings,
-    es_write_data,
+    prepare_person_es_data,
     make_get_request,
     person_id,
     expected,
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id
     
     # Act
@@ -135,13 +131,12 @@ async def test_persons_invalid_id(
 @pytest.mark.asyncio
 async def test_persons_films(
     settings,
-    es_write_data,
+    prepare_person_es_data,
     make_get_request,
     person_id,
     expected
 ):
     # Arrange
-    await es_write_data(index=settings.es_index['persons'], id_field='id', data=es_persons)
     url = settings.service_url + '/api/v1/persons/' + person_id + '/film'
     
     # Act

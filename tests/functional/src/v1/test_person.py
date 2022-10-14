@@ -14,11 +14,13 @@ from testdata.load_to_es_data import es_persons
 async def test_persons(
     settings,
     prepare_person_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/'
     
     # Act
@@ -41,11 +43,13 @@ async def test_persons(
 async def test_persons_full_name(
     settings,
     prepare_person_es_data,
+    redis_client,
     make_get_request,
     query_data,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/'
     
     # Act
@@ -76,11 +80,13 @@ async def test_persons_full_name(
 async def test_persons_id(
     settings,
     prepare_person_es_data,
+    redis_client,
     make_get_request,
     person_id,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/' + person_id
     
     # Act
@@ -106,11 +112,13 @@ async def test_persons_id(
 async def test_persons_invalid_id(
     settings,
     prepare_person_es_data,
+    redis_client,
     make_get_request,
     person_id,
     expected,
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/' + person_id
     
     # Act
@@ -132,11 +140,13 @@ async def test_persons_invalid_id(
 async def test_persons_films(
     settings,
     prepare_person_es_data,
+    redis_client,
     make_get_request,
     person_id,
     expected
 ):
     # Arrange
+    await redis_client.flushall()
     url = settings.service_url + '/api/v1/persons/' + person_id + '/film'
     
     # Act

@@ -1,18 +1,30 @@
 import logging
-import time
 
 from elasticsearch import Elasticsearch
 
 from settings import get_settings
+from utils.backoff import backoff
 
-if __name__ == '__main__':
+
+class ElasticsearchIsNotConnected(Exception):
+    """Исключение вызываемое если не удалось подключиться к Elasticsearch."""
+    pass
+    
+
+@backoff()
+def wait_for_es():
     es_client = Elasticsearch(
         hosts=get_settings().es_host,
         verify_certs=False
     )
-    while True:
-        if es_client.ping():
-            logging.info('Elasticsearch is connected.')
-            break
-        logging.info('Elasticsearch is not connected, retry in 1 seconds...')
-        time.sleep(1) 
+    
+    if es_client.ping():
+        logging.info('Elasticsearch is connected.')
+        return
+    
+    raise ElasticsearchIsNotConnected('Elasticsearch is not connected.')
+
+
+if __name__ == '__main__':
+    logging.exception('gddgdgdgdgdgdgdgdgd dgdgdgfdgd gdddg 3#####################################')
+    wait_for_es()

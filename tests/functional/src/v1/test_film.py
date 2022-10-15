@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 
 from testdata.load_to_es_data import es_films
@@ -6,8 +8,8 @@ from testdata.load_to_es_data import es_films
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        (None, {"status": 200, "length": 2}),
-        ({'page[size]': 1}, {"status": 200, "length": 1}),
+        (None, {"status": HTTPStatus.OK, "length": 2}),
+        ({'page[size]': 1}, {"status": HTTPStatus.OK, "length": 1}),
     ],
 )
 @pytest.mark.asyncio
@@ -36,9 +38,9 @@ async def test_films(
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'page[size]': 1, 'page[number]': 2}, {"status": 200, "title": 'The Shining'}),
-        ({'sort': '-imdb_rating'}, {"status": 200, "title": 'The Shining'}),
-        ({'filter[genre]': 'horror'}, {"status": 200, "title": 'The Shining'}),
+        ({'page[size]': 1, 'page[number]': 2}, {"status": HTTPStatus.OK, "title": 'The Shining'}),
+        ({'sort': '-imdb_rating'}, {"status": HTTPStatus.OK, "title": 'The Shining'}),
+        ({'filter[genre]': 'horror'}, {"status": HTTPStatus.OK, "title": 'The Shining'}),
     ],
 )
 @pytest.mark.asyncio
@@ -67,7 +69,7 @@ async def test_films_title(
 @pytest.mark.parametrize(
     "film_id, expected",
     [
-        (es_films[0]['id'], {'status': 200, 'title': 'Star Wars'}),
+        (es_films[0]['id'], {'status': HTTPStatus.OK, 'title': 'Star Wars'}),
     ],
 )
 @pytest.mark.asyncio
@@ -96,8 +98,8 @@ async def test_films_id(
 @pytest.mark.parametrize(
     "film_id, expected",
     [
-        ('fa189edd-9f2b-4d21-ac33-895890a93632', {'status': 404}),
-        ('some invalid id', {'status': 422}),
+        ('fa189edd-9f2b-4d21-ac33-895890a93632', {'status': HTTPStatus.NOT_FOUND}),
+        ('some invalid id', {'status': HTTPStatus.UNPROCESSABLE_ENTITY}),
     ],
 )
 @pytest.mark.asyncio

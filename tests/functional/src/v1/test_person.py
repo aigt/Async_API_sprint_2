@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 
 from testdata.load_to_es_data import es_persons
@@ -6,8 +8,8 @@ from testdata.load_to_es_data import es_persons
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        (None, {"status": 200, "length": 4}),
-        ({'page[size]': 1}, {"status": 200, "length": 1}),
+        (None, {"status": HTTPStatus.OK, "length": 4}),
+        ({'page[size]': 1}, {"status": HTTPStatus.OK, "length": 1}),
     ],
 )
 @pytest.mark.asyncio
@@ -36,7 +38,7 @@ async def test_persons(
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'page[size]': 1, 'page[number]': 2}, {"status": 200, "full_name": 'Mark Hamill'}),
+        ({'page[size]': 1, 'page[number]': 2}, {"status": HTTPStatus.OK, "full_name": 'Mark Hamill'}),
     ],
 )
 @pytest.mark.asyncio
@@ -104,8 +106,8 @@ async def test_persons_id(
 @pytest.mark.parametrize(
     "person_id, expected",
     [
-        ('fa189edd-9f2b-4d21-ac33-895890a93632', {'status': 404}),
-        ('some invalid id', {'status': 422}),
+        ('fa189edd-9f2b-4d21-ac33-895890a93632', {'status': HTTPStatus.NOT_FOUND}),
+        ('some invalid id', {'status': HTTPStatus.UNPROCESSABLE_ENTITY}),
     ],
 )
 @pytest.mark.asyncio
@@ -133,7 +135,7 @@ async def test_persons_invalid_id(
 @pytest.mark.parametrize(
     "person_id, expected",
     [
-        (es_persons[1]['id'], {"status": 200, "movie_count": 36}),
+        (es_persons[1]['id'], {"status": HTTPStatus.OK, "movie_count": 36}),
     ],
 )
 @pytest.mark.asyncio

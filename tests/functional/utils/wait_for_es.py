@@ -26,5 +26,4 @@ def wait_for_es():
 
 
 if __name__ == '__main__':
-    logging.exception('gddgdgdgdgdgdgdgdgd dgdgdgfdgd gdddg 3#####################################')
     wait_for_es()

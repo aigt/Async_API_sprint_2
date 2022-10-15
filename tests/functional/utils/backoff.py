@@ -43,7 +43,6 @@ def backoff(
                 try:
                     logging.info(f'try to execute {func.__name__}')
                     res = func(*args, **kwargs)
-                    logging.info(f'result: {res}')
                     return res
                 except exceptions as e:
                     logging.exception(f'filed {try_number+1} try to execute {func.__name__}')

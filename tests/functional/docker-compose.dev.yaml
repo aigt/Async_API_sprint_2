@@ -5,7 +5,7 @@ services:
     build: ../../movies_api/
     image: movies_api
     ports:
-      - "8000"
+      - "8000:8000"
     env_file:
       - env_files/elastic.env.example
       - env_files/redis.env.example
@@ -27,8 +27,8 @@ services:
       - discovery.type=single-node
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
-    expose:
-      - "9200"
+    ports:
+      - "9200:9200"
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
       interval: 5s
@@ -39,34 +39,13 @@ services:
     image: 'bitnami/redis:latest'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-    expose:
-      - '6379'
+    ports:
+      - '6379:6379'
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 2s
       timeout: 3s
       retries: 30
-
-  test_service:
-    build:
-      context: .
-      args:
-        TESTS_ROOT: /tests/functional
-    ports:
-      - "8001:8000"
-    env_file:
-      - env_files/elastic.env.example
-      - env_files/redis.env.example
-      - env_files/movies_api.env.example
-    entrypoint: >
-      sh -c "pip install -r /tests/functional/requirements.txt && python3 /tests/functional/utils/wait_for_es.py && python3 /tests/functional/utils/wait_for_redis.py && pytest /tests/functional/src"
-    depends_on:
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-      service:
-        condition: service_healthy
 
 volumes:
   postgres_data:

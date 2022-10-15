@@ -10,6 +10,7 @@ from api.v1.api import api_router
 from core.config import get_settings
 from core.logger import LOGGING
 from db import elastic, redis
+from api import health
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -42,6 +43,10 @@ tags_metadata = [
         "name": "persons",
         "description": "Операции с персонами (в т.ч. актёрами, режиссёрами, сценаристами).",
     },
+    {
+        "name": "api_healthcheck",
+        "description": "Эндпоинт для проверки состояния api-сервиса с помощью healthcheck'ов.",
+    },
 ]
 
 
@@ -49,7 +54,7 @@ app = FastAPI(
     title=settings.project_name,
     description=description,
     openapi_tags=tags_metadata,
-    version="1.1.0",
+    version="1.2.0",
     docs_url='/api/openapi',
     contact={
         "name": "Ссылка на репозиторий GitHub",
@@ -70,12 +75,13 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
-    redis.redis.close()
     await elastic.es.close()
-    await redis.redis.wait_closed()
+    await redis.close()
+    await redis.connection_pool.disconnect()
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(health.router, prefix="/api/health", tags=["api_healthcheck"])
 
 
 if __name__ == '__main__':

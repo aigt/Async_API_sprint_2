@@ -28,8 +28,8 @@ services:
 
   service:
     build: movies_api
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     env_file:
       - env_files/elastic.env.example
       - env_files/redis.env.example
@@ -68,8 +68,8 @@ services:
       - discovery.type=single-node
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
+    expose:
+      - "9200"
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
       interval: 30s

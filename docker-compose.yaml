@@ -39,6 +39,11 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
+    healthcheck:
+      test: curl --fail http://service:8000/api/health/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   etl:
     build: etl

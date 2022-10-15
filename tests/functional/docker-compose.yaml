@@ -48,13 +48,18 @@ services:
       retries: 30
 
   test_service:
-    build: .
+    build:
+      context: .
+      args:
+        TESTS_ROOT: /tests/functional
     ports:
       - "8001:8000"
     env_file:
       - env_files/elastic.env.example
       - env_files/redis.env.example
       - env_files/movies_api.env.example
+    entrypoint: >
+      sh -c "pip install -r /tests/functional/requirements.txt && python3 /tests/functional/utils/wait_for_es.py && python3 /tests/functional/utils/wait_for_redis.py && pytest /tests/functional/src"
     depends_on:
       redis:
         condition: service_healthy

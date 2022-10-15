@@ -75,9 +75,9 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
-    redis.redis.close()
     await elastic.es.close()
-    await redis.redis.wait_closed()
+    await redis.close()
+    await redis.connection_pool.disconnect()
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

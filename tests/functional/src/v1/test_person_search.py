@@ -1,4 +1,4 @@
-import logging
+from http import HTTPStatus
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'query': 'Mark', 'page[size]': 50}, {'status': 200, 'length': 2}),
-        ({'query': 'Unknown Person', 'page[size]': 50}, {'status': 404, 'length': 1}),
-        (None, {'status': 422, 'length': 1}),
-        ({'query': 'Mark', 'page[size]': 1}, {'status': 200, 'length': 1}),
+        ({'query': 'Mark', 'page[size]': 50}, {'status': HTTPStatus.OK, 'length': 2}),
+        ({'query': 'Unknown Person', 'page[size]': 50}, {'status': HTTPStatus.NOT_FOUND, 'length': 1}),
+        (None, {'status': HTTPStatus.UNPROCESSABLE_ENTITY, 'length': 1}),
+        ({'query': 'Mark', 'page[size]': 1}, {'status': HTTPStatus.OK, 'length': 1}),
     ],
 )
 @pytest.mark.asyncio
@@ -38,7 +38,7 @@ async def test_persons_search(
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'query': 'mark', 'page[size]': 1, 'page[number]': 2}, {'status': 200, 'full_name': 'Mark Zuckerberg'}),
+        ({'query': 'mark', 'page[size]': 1, 'page[number]': 2}, {'status': HTTPStatus.OK, 'full_name': 'Mark Zuckerberg'}),
     ],
 )
 @pytest.mark.asyncio

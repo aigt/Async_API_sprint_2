@@ -1,13 +1,15 @@
+from http import HTTPStatus
+
 import pytest
 
 
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'query': 'The Star', 'page[size]': 50}, {'status': 200, 'length': 50}),
-        ({'query': 'Unknown Movie', 'page[size]': 50}, {'status': 404, 'length': 1}),
-        (None, {'status': 422, 'length': 1}),
-        ({'query': 'The Star', 'page[size]': 1}, {'status': 200, 'length': 1}),
+        ({'query': 'The Star', 'page[size]': 50}, {'status': HTTPStatus.OK, 'length': 50}),
+        ({'query': 'Unknown Movie', 'page[size]': 50}, {'status': HTTPStatus.NOT_FOUND, 'length': 1}),
+        (None, {'status': HTTPStatus.UNPROCESSABLE_ENTITY, 'length': 1}),
+        ({'query': 'The Star', 'page[size]': 1}, {'status': HTTPStatus.OK, 'length': 1}),
     ],
 )
 @pytest.mark.asyncio
@@ -36,7 +38,7 @@ async def test_films_search(
 @pytest.mark.parametrize(
     "query_data, expected",
     [
-        ({'query': 'The Star', 'page[size]': 1, 'page[number]': 2}, {'status': 200, 'title': 'The Star 1'}),
+        ({'query': 'The Star', 'page[size]': 1, 'page[number]': 2}, {'status': HTTPStatus.OK, 'title': 'The Star 1'}),
     ],
 )
 @pytest.mark.asyncio

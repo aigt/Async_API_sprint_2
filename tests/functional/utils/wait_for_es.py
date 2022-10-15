@@ -1,3 +1,4 @@
+import logging
 import time
 
 from elasticsearch import Elasticsearch
@@ -11,7 +12,7 @@ if __name__ == '__main__':
     )
     while True:
         if es_client.ping():
-            print('Elasticsearch is connected.')
+            logging.info('Elasticsearch is connected.')
             break
-        print('Elasticsearch is not connected, retry in 1 seconds...')
+        logging.info('Elasticsearch is not connected, retry in 1 seconds...')
         time.sleep(1) 

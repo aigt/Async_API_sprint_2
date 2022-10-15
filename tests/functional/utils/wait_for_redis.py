@@ -1,3 +1,4 @@
+import logging
 import time
 
 import aioredis
@@ -13,9 +14,9 @@ if __name__ == '__main__':
     while True:
         try:
             if r_client.ping():
-                print('Redis is connected.')
+                logging.info('Redis is connected.')
                 break
         except (aioredis.ConnectionError, aioredis.TimeoutError):
-            print('Redis is not connected, retry in 1 seconds...')
+            logging.info('Redis is not connected, retry in 1 seconds...')
             time.sleep(1)
         

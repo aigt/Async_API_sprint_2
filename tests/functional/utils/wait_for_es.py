@@ -11,7 +11,7 @@ if __name__ == '__main__':
     )
     while True:
         if es_client.ping():
-            print('Elasticsearch connected.')
+            print('Elasticsearch is connected.')
             break
-        print('Elasticsearch not connected, retry in 1 seconds...')
+        print('Elasticsearch is not connected, retry in 1 seconds...')
         time.sleep(1) 

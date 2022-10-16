@@ -28,6 +28,7 @@ def backoff(
     Формула:
         t = start_sleep_time * 2^(n) if t < border_sleep_time
         t = border_sleep_time if t >= border_sleep_time
+    :param exceptions: перехватываемое исключение или кортеж исключений
     :param start_sleep_time: начальное время повтора, секунд
     :param factor: во сколько раз нужно увеличить время ожидания
     :param border_sleep_time: граничное время ожидания, секунд

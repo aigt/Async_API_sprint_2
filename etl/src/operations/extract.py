@@ -1,8 +1,8 @@
 import logging
 from typing import Any
 
-import psycopg2
-from psycopg2.extras import DictCursor
+import psycopg
+from psycopg.rows import dict_row
 
 from decorators.pg_reconnect import pg_reconnect
 
@@ -23,7 +23,7 @@ class PostgresExtractor:
     def reconnect(self) -> None:
         """Функция закрывает соединение с БД и создает новое"""
         self.close()
-        self._connection = psycopg2.connect(dsn=self._dsn)
+        self._connection = psycopg.connect(self._dsn)
 
     def close(self) -> None:
         """Функция закрывает соединение с БД"""
@@ -80,7 +80,7 @@ class PostgresExtractor:
         """Функция подключается к БД, выполняет запрос и возвращает данные в виде списка"""
         data = []
 
-        pg_curs = self._connection.cursor(cursor_factory=DictCursor)
+        pg_curs = self._connection.cursor(row_factory=dict_row)
 
         data += self.get_movies_changes(
             cursor=pg_curs,

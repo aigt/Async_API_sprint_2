@@ -43,7 +43,8 @@ SELECT  fw.id,
                 )
             ) FILTER (WHERE pfw.role = 'writer'),
             '[]'
-        ) AS writers
+        ) AS writers,
+    fw.subscription
 
 
 FROM        content.film_work fw

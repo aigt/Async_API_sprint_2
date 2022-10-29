@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS content.film_work (
     type VARCHAR(20) NOT NULL,
     created timestamp with time zone,
     modified timestamp with time zone,
+    subscription BOOLEAN DEFAULT FALSE,
     CONSTRAINT unique_film_with_date UNIQUE (creation_date, title)
 ); 
 

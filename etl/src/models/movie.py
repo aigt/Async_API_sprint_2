@@ -16,6 +16,7 @@ class Movie:
     writers_names: list
     actors: list
     writers: list
+    subscription: bool
 
     def __post_init__(self):
         if self.imdb_rating is None:

@@ -40,6 +40,7 @@ ELASTIC_MAPPINGS = {
             "fields": {"raw": {"type": "keyword"}},
         },
         "description": {"type": "text", "analyzer": "ru_en"},
+        "subscription": {"type": "boolean"},
         "director": {"type": "text", "analyzer": "ru_en"},
         "actors_names": {"type": "text", "analyzer": "ru_en"},
         "writers_names": {"type": "text", "analyzer": "ru_en"},

@@ -15,6 +15,7 @@ class FilmWork(orjson_model.OrjsonModel):
     title: str
     genre: list[str]
     description: str | None
+    subscription: bool | None
     actors_names: list[str] | None
     writers_names: list[str] | None
     actors: list[actor.Actor]
@@ -24,6 +25,10 @@ class FilmWork(orjson_model.OrjsonModel):
     @validator('description')
     def set_description(cls, description):
         return description or ''
+
+    @validator('subscription')
+    def set_subscription(cls, subscription):
+        return subscription or False
 
     @validator('imdb_rating')
     def set_imdb_rating(cls, imdb_rating):

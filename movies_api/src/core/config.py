@@ -35,6 +35,12 @@ class Settings(BaseSettings):
 
     # Максимальное количество элементов на странице
     max_page_size: int = Field(default=50)
+    
+    # Публичный ключ для декодирования токенов авторизации
+    auth_rsa_public_key = Field(default='')
+    
+    # Роль в токене, по которой идентифицируется подписчик
+    subscriber_role_name = 'subscriber'
 
 
 @lru_cache()

@@ -1,5 +1,8 @@
+import asyncio
 import logging.config
 import time
+
+import uvloop
 
 from core.config import get_settings
 from core.logger import LOGGING
@@ -10,6 +13,7 @@ from schemas import elastic as es_schemas
 from sql.sql import extract_queries
 from states.state import JsonFileStorage, State
 
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 # Применяем настройки логирования
 logging.config.dictConfig(LOGGING)
 

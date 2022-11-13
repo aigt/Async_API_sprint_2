@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     
     # Публичный ключ для декодирования токенов авторизации
     auth_rsa_public_key = Field(...)
+    
+    # Роль в токене, по которой идентифицируется подписчик
+    subscriber_role_name = 'subscriber'
 
 
 @lru_cache()

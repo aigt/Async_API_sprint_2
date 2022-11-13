@@ -1,10 +1,10 @@
+import logging
 import uuid as uuid_m
-
-from fastapi import Depends, Path
 
 from api.v1.schemas import Film
 from cache import cached
 from core.text_messages import FURTHER_INFORMATION_ONLY_FOR_SUBSCRIBERS
+from fastapi import Depends, Path
 from models.elastic.film import Film as ElasticFilm
 from repositories.elastic import ElastisearchRepository, get_film_repository
 from services.film.film_list_query_body import (film_list_query_body,

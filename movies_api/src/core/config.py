@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     max_page_size: int = Field(default=50)
     
     # Публичный ключ для декодирования токенов авторизации
-    auth_rsa_public_key = Field(...)
+    auth_rsa_public_key = Field(default='')
     
     # Роль в токене, по которой идентифицируется подписчик
     subscriber_role_name = 'subscriber'

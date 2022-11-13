@@ -8,3 +8,5 @@ PERSON_NOT_FOUND = 'person not found'
 PERSONS_NOT_FOUND = 'persons not found'
 
 PERSON_FILMS_NOT_FOUND = 'person films not found'
+
+FURTHER_INFORMATION_ONLY_FOR_SUBSCRIBERS = 'further information only for subscribers'

@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # Роль в токене, по которой идентифицируется подписчик
     subscriber_role_name = 'subscriber'
 
+    # Адрес для логирования ошибок
+    sentry_dsn: str = "https://4d3cd8b5585e41fda8dc722e72ca93a8@o4504286904188928.ingest.sentry.io/4504287423561728"
+
 
 @lru_cache()
 def get_settings():

@@ -2,6 +2,7 @@ from logging import config as logging_config
 
 import aioredis
 import uvicorn
+import sentry_sdk
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -16,6 +17,11 @@ from api import health
 logging_config.dictConfig(LOGGING)
 
 settings = get_settings()
+
+sentry_sdk.init(
+    dsn=settings.sentry_dsn,
+    traces_sample_rate=1.0,
+)
 
 description = """
 Асинхронный API для кинотеатра
